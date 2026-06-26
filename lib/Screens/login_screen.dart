@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fit_nova_x/Screens/home_screen.dart';
 
 class LoginScreen
     extends
@@ -140,6 +141,15 @@ class _LoginScreenState
                     ElevatedButton(
                       onPressed: () {
                         // Handle login logic here
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (
+                                  context,
+                                ) => HomeScreen(),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(
