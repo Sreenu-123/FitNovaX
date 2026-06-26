@@ -15,7 +15,7 @@ class SplashScreen
         children: [
           Center(
             child: Image.asset(
-              'assets/images/logoNoBack.png',
+              'assets/Images/logoNoBack.png',
               width: 180,
               height: 180,
             ),

@@ -57,7 +57,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/logoNoBack.png
+    - assets/Images/logoNoBack.png
+    - assets/Images/google_logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
