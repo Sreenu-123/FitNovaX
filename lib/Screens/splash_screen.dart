@@ -1,8 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:fit_nova_x/Screens/login_screen.dart';
 
 class SplashScreen
     extends
-        StatelessWidget {
+        StatefulWidget {
+  @override
+  State<
+    SplashScreen
+  >
+  createState() =>
+      _SplashScreenState();
+}
+
+class _SplashScreenState
+    extends
+        State<
+          SplashScreen
+        > {
+  @override
+  void
+  initState() {
+    super.initState();
+    Future.delayed(
+      Duration(
+        seconds: 3,
+      ),
+      () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder:
+                (
+                  context,
+                ) => LoginScreen(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget
   build(
