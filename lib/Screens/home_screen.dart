@@ -2,11 +2,27 @@ import 'package:flutter/material.dart';
 
 class HomeScreen
     extends
-        StatelessWidget {
+        StatefulWidget {
   const HomeScreen({
     super.key,
   });
 
+  @override
+  State<
+    HomeScreen
+  >
+  createState() =>
+      _HomeScreenState();
+}
+
+class _HomeScreenState
+    extends
+        State<
+          HomeScreen
+        > {
+  int
+  currentIndex =
+      0;
   @override
   Widget
   build(
@@ -73,39 +89,171 @@ class HomeScreen
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              icon: const Icon(
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    currentIndex ==
+                        0
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      ).withValues(
+                        alpha: 0.25,
+                      )
+                    : Colors.transparent,
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              icon: Icon(
                 Icons.home,
-                color: Colors.white,
+                color:
+                    currentIndex ==
+                        0
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      )
+                    : Colors.white,
               ),
               onPressed: () {
                 // Handle home button press
+                setState(
+                  () {
+                    currentIndex = 0;
+                  },
+                );
               },
             ),
             IconButton(
-              icon: const Icon(
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    currentIndex ==
+                        1
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      ).withValues(
+                        alpha: 0.25,
+                      )
+                    : Colors.transparent,
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              icon: Icon(
                 Icons.restaurant_menu,
-                color: Colors.white,
+                color:
+                    currentIndex ==
+                        1
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      )
+                    : Colors.white,
               ),
               onPressed: () {
                 // Handle search button press
+                setState(
+                  () {
+                    currentIndex = 1;
+                  },
+                );
               },
             ),
             IconButton(
-              icon: const Icon(
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    currentIndex ==
+                        2
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      ).withValues(
+                        alpha: 0.25,
+                      )
+                    : Colors.transparent,
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              icon: Icon(
                 Icons.route,
-                color: Colors.white,
+                color:
+                    currentIndex ==
+                        2
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      )
+                    : Colors.white,
               ),
               onPressed: () {
                 // Handle profile button press
+                setState(
+                  () {
+                    currentIndex = 2;
+                  },
+                );
               },
             ),
             IconButton(
-              icon: const Icon(
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    currentIndex ==
+                        3
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      ).withValues(
+                        alpha: 0.25,
+                      )
+                    : Colors.transparent,
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              icon: Icon(
                 Icons.menu,
-                color: Colors.white,
+                color:
+                    currentIndex ==
+                        3
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      )
+                    : Colors.white,
               ),
               onPressed: () {
                 // Handle profile button press
+                setState(
+                  () {
+                    currentIndex = 3;
+                  },
+                );
               },
             ),
           ],
