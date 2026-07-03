@@ -188,12 +188,14 @@ class _HomeScreenState
                     : Colors.transparent,
                 shape: StadiumBorder(),
                 padding: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                  horizontal: 8.0,
+                  vertical: 4.0,
                 ),
               ),
-              icon: Icon(
-                Icons.route,
+              icon: Image.asset(
+                'assets/Images/logoNoBack.png',
+                width: 44,
+                height: 44,
                 color:
                     currentIndex ==
                         2
@@ -235,7 +237,7 @@ class _HomeScreenState
                 ),
               ),
               icon: Icon(
-                Icons.menu,
+                Icons.route,
                 color:
                     currentIndex ==
                         3
@@ -252,6 +254,48 @@ class _HomeScreenState
                 setState(
                   () {
                     currentIndex = 3;
+                  },
+                );
+              },
+            ),
+            IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    currentIndex ==
+                        4
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      ).withValues(
+                        alpha: 0.25,
+                      )
+                    : Colors.transparent,
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    currentIndex ==
+                        4
+                    ? const Color.fromARGB(
+                        255,
+                        0,
+                        200,
+                        255,
+                      )
+                    : Colors.white,
+              ),
+              onPressed: () {
+                // Handle profile button press
+                setState(
+                  () {
+                    currentIndex = 4;
                   },
                 );
               },
