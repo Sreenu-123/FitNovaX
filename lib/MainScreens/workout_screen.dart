@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fit_nova_x/MainScreens/workout_schedule_screen.dart';
 
 class WorkoutScreen
     extends
@@ -25,6 +26,7 @@ class _WorkoutScreenState
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+
         title: const Text(
           'Workouts',
           style: TextStyle(
@@ -70,7 +72,15 @@ class _WorkoutScreenState
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle create workout button press
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (
+                                  context,
+                                ) => WorkoutScheduleScreen(),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(

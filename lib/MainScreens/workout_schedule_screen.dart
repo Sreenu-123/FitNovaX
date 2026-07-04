@@ -14,6 +14,9 @@ class WorkoutScheduleScreen
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         title: const Text(
           'Workout Schedule',
           style: TextStyle(

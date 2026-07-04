@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fit_nova_x/Screens/home_screen.dart';
+import 'package:fit_nova_x/MainScreens/main_screen.dart';
 
 class LoginScreen
     extends
@@ -147,7 +147,7 @@ class _LoginScreenState
                             builder:
                                 (
                                   context,
-                                ) => HomeScreen(),
+                                ) => MainScreen(),
                           ),
                         );
                       },
