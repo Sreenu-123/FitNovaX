@@ -15,6 +15,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
+  static const Color blue = Color(0xFF00C8FF);
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -40,164 +42,119 @@ class _MainScreenState extends State<MainScreen> {
 
       body: screens[_selectedIndex],
 
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(20),
-        height: 70,
+      // ============================================================
+      // FLOATING GLASS BOTTOM NAVIGATION
+      // ============================================================
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+
+          child: Container(
+            height: 72,
+
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.92),
+
+              borderRadius: BorderRadius.circular(36),
+
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.8),
+                  blurRadius: 25,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(36),
+
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                children: [
+                  // HOME
+                  _navItem(index: 0, icon: Icons.home_rounded),
+
+                  // DIET
+                  _navItem(index: 1, icon: Icons.restaurant_menu_rounded),
+
+                  // WORKOUT
+                  _navItem(
+                    index: 2,
+                    customIcon: Image.asset(
+                      'assets/Images/logoNoBack.png',
+                      width: 42,
+                      height: 42,
+                    ),
+                  ),
+
+                  // ROADMAP
+                  _navItem(index: 3, icon: Icons.route_rounded),
+
+                  // MENU
+                  _navItem(index: 4, icon: Icons.menu_rounded),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // NAVIGATION ITEM
+  // ============================================================
+
+  Widget _navItem({required int index, IconData? icon, Widget? customIcon}) {
+    final bool selected = _selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        _onItemTapped(index);
+      },
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+
+        curve: Curves.easeOut,
+
+        height: 52,
+        width: 60,
 
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
-          borderRadius: BorderRadius.circular(35),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black54,
-              blurRadius: 20,
-              offset: Offset(0, 8),
-            ),
-          ],
+          color: selected ? blue.withValues(alpha: 0.16) : Colors.transparent,
+
+          borderRadius: BorderRadius.circular(26),
+
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: blue.withValues(alpha: 0.12),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
         ),
 
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // HOME
-            IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: _selectedIndex == 0
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      ).withValues(alpha: 0.25)
-                    : Colors.transparent,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
+        child: Center(
+          child: customIcon != null
+              ? ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    selected ? blue : Colors.white,
+                    BlendMode.srcIn,
+                  ),
 
-              icon: Icon(
-                Icons.home,
-                color: _selectedIndex == 0
-                    ? const Color.fromARGB(255, 0, 200, 255)
-                    : Colors.white,
-              ),
-
-              onPressed: () => _onItemTapped(0),
-            ),
-
-            // DIET
-            IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: _selectedIndex == 1
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      ).withValues(alpha: 0.25)
-                    : Colors.transparent,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-
-              icon: Icon(
-                Icons.restaurant_menu,
-                color: _selectedIndex == 1
-                    ? const Color.fromARGB(255, 0, 200, 255)
-                    : Colors.white,
-              ),
-
-              onPressed: () => _onItemTapped(1),
-            ),
-
-            // WORKOUT
-            IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: _selectedIndex == 2
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      ).withValues(alpha: 0.25)
-                    : Colors.transparent,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              ),
-
-              icon: Image.asset(
-                'assets/Images/logoNoBack.png',
-                width: 44,
-                height: 44,
-                color: _selectedIndex == 2
-                    ? const Color.fromARGB(255, 0, 200, 255)
-                    : Colors.white,
-              ),
-
-              onPressed: () => _onItemTapped(2),
-            ),
-
-            // ROADMAP
-            IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: _selectedIndex == 3
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      ).withValues(alpha: 0.25)
-                    : Colors.transparent,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-
-              icon: Icon(
-                Icons.route,
-                color: _selectedIndex == 3
-                    ? const Color.fromARGB(255, 0, 200, 255)
-                    : Colors.white,
-              ),
-
-              onPressed: () => _onItemTapped(3),
-            ),
-
-            // MENU
-            IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: _selectedIndex == 4
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      ).withValues(alpha: 0.25)
-                    : Colors.transparent,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-
-              icon: Icon(
-                Icons.menu,
-                color: _selectedIndex == 4
-                    ? const Color.fromARGB(255, 0, 200, 255)
-                    : Colors.white,
-              ),
-
-              onPressed: () => _onItemTapped(4),
-            ),
-          ],
+                  child: customIcon,
+                )
+              : Icon(icon, size: 24, color: selected ? blue : Colors.white70),
         ),
       ),
     );
