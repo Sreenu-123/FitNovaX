@@ -1,44 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/MainScreens/workout_schedule_screen.dart';
 
-class WorkoutScreen
-    extends
-        StatefulWidget {
+class WorkoutScreen extends StatefulWidget {
+  const WorkoutScreen({super.key});
+
   @override
-  _WorkoutScreenState
-  createState() =>
-      _WorkoutScreenState();
+  _WorkoutScreenState createState() => _WorkoutScreenState();
 }
 
-class _WorkoutScreenState
-    extends
-        State<
-          WorkoutScreen
-        > {
+class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
-  Widget
-  build(
-    BuildContext
-    context,
-  ) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
 
-        title: const Text(
-          'Workouts',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
+        title: const Text('Workouts', style: TextStyle(color: Colors.white)),
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(
-            20,
-          ),
+          padding: const EdgeInsets.all(20),
           child: Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -52,20 +35,13 @@ class _WorkoutScreenState
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
+                const SizedBox(height: 5),
                 Text(
                   'Build your personalized\n workout plan',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-                const SizedBox(
-                  height: 120,
-                ),
+                const SizedBox(height: 120),
                 Center(
                   child: SizedBox(
                     width: double.infinity,
@@ -75,32 +51,19 @@ class _WorkoutScreenState
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (
-                                  context,
-                                ) => WorkoutScheduleScreen(),
+                            builder: (context) => WorkoutScheduleScreen(),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          0,
-                          200,
-                          255,
-                        ),
+                        backgroundColor: const Color.fromARGB(255, 0, 200, 255),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            30,
-                          ),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       child: const Text(
                         'Create Workout',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),

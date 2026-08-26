@@ -5,293 +5,197 @@ import 'package:fit_nova_x/MainScreens/diet_screen.dart';
 import 'package:fit_nova_x/MainScreens/roadmap_screen.dart';
 import 'package:fit_nova_x/MainScreens/menu_screen.dart';
 
-class MainScreen
-    extends
-        StatefulWidget {
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
-  State<
-    MainScreen
-  >
-  createState() =>
-      _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState
-    extends
-        State<
-          MainScreen
-        > {
-  int
-  _selectedIndex =
-      0;
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
 
-  final List<
-    Widget
-  >
-  _screens = [
-    HomeScreen(),
-    DietScreen(),
-    WorkoutScreen(),
-    RoadmapScreen(),
-    MenuScreen(),
-  ];
-
-  void
-  _onItemTapped(
-    int
-    index,
-  ) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
   @override
-  Widget
-  build(
-    BuildContext
-    context,
-  ) {
+  Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      HomeScreen(
+        onWorkoutTap: () {
+          _onItemTapped(2);
+        },
+      ),
+      const DietScreen(),
+      const WorkoutScreen(),
+      const RoadmapScreen(),
+      const MenuScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _screens[_selectedIndex],
+
+      body: screens[_selectedIndex],
+
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(
-          20,
-        ),
+        margin: const EdgeInsets.all(20),
         height: 70,
+
         decoration: BoxDecoration(
-          color: const Color(
-            0xFF151515,
-          ),
-          borderRadius: BorderRadius.circular(
-            35,
-          ),
-          boxShadow: [
+          color: const Color(0xFF151515),
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: const [
             BoxShadow(
               color: Colors.black54,
               blurRadius: 20,
-              offset: const Offset(
-                0,
-                8,
-              ),
+              offset: Offset(0, 8),
             ),
           ],
         ),
+
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            // HOME
             IconButton(
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _selectedIndex ==
-                        0
+                backgroundColor: _selectedIndex == 0
                     ? const Color.fromARGB(
                         255,
                         0,
                         200,
                         255,
-                      ).withValues(
-                        alpha: 0.25,
-                      )
+                      ).withValues(alpha: 0.25)
                     : Colors.transparent,
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
               ),
+
               icon: Icon(
                 Icons.home,
-                color:
-                    _selectedIndex ==
-                        0
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      )
+                color: _selectedIndex == 0
+                    ? const Color.fromARGB(255, 0, 200, 255)
                     : Colors.white,
               ),
-              onPressed: () {
-                // Handle home button press
-                setState(
-                  () {
-                    _selectedIndex = 0;
-                  },
-                );
-              },
+
+              onPressed: () => _onItemTapped(0),
             ),
+
+            // DIET
             IconButton(
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _selectedIndex ==
-                        1
+                backgroundColor: _selectedIndex == 1
                     ? const Color.fromARGB(
                         255,
                         0,
                         200,
                         255,
-                      ).withValues(
-                        alpha: 0.25,
-                      )
+                      ).withValues(alpha: 0.25)
                     : Colors.transparent,
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
               ),
+
               icon: Icon(
                 Icons.restaurant_menu,
-                color:
-                    _selectedIndex ==
-                        1
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      )
+                color: _selectedIndex == 1
+                    ? const Color.fromARGB(255, 0, 200, 255)
                     : Colors.white,
               ),
-              onPressed: () {
-                // Handle search button press
-                setState(
-                  () {
-                    _selectedIndex = 1;
-                  },
-                );
-              },
+
+              onPressed: () => _onItemTapped(1),
             ),
+
+            // WORKOUT
             IconButton(
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _selectedIndex ==
-                        2
+                backgroundColor: _selectedIndex == 2
                     ? const Color.fromARGB(
                         255,
                         0,
                         200,
                         255,
-                      ).withValues(
-                        alpha: 0.25,
-                      )
+                      ).withValues(alpha: 0.25)
                     : Colors.transparent,
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 4.0,
-                ),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
+
               icon: Image.asset(
                 'assets/Images/logoNoBack.png',
                 width: 44,
                 height: 44,
-                color:
-                    _selectedIndex ==
-                        2
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      )
+                color: _selectedIndex == 2
+                    ? const Color.fromARGB(255, 0, 200, 255)
                     : Colors.white,
               ),
-              onPressed: () {
-                // Handle profile button press
-                setState(
-                  () {
-                    _selectedIndex = 2;
-                  },
-                );
-              },
+
+              onPressed: () => _onItemTapped(2),
             ),
+
+            // ROADMAP
             IconButton(
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _selectedIndex ==
-                        3
+                backgroundColor: _selectedIndex == 3
                     ? const Color.fromARGB(
                         255,
                         0,
                         200,
                         255,
-                      ).withValues(
-                        alpha: 0.25,
-                      )
+                      ).withValues(alpha: 0.25)
                     : Colors.transparent,
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
               ),
+
               icon: Icon(
                 Icons.route,
-                color:
-                    _selectedIndex ==
-                        3
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      )
+                color: _selectedIndex == 3
+                    ? const Color.fromARGB(255, 0, 200, 255)
                     : Colors.white,
               ),
-              onPressed: () {
-                // Handle profile button press
-                setState(
-                  () {
-                    _selectedIndex = 3;
-                  },
-                );
-              },
+
+              onPressed: () => _onItemTapped(3),
             ),
+
+            // MENU
             IconButton(
               style: IconButton.styleFrom(
-                backgroundColor:
-                    _selectedIndex ==
-                        4
+                backgroundColor: _selectedIndex == 4
                     ? const Color.fromARGB(
                         255,
                         0,
                         200,
                         255,
-                      ).withValues(
-                        alpha: 0.25,
-                      )
+                      ).withValues(alpha: 0.25)
                     : Colors.transparent,
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
               ),
+
               icon: Icon(
                 Icons.menu,
-                color:
-                    _selectedIndex ==
-                        4
-                    ? const Color.fromARGB(
-                        255,
-                        0,
-                        200,
-                        255,
-                      )
+                color: _selectedIndex == 4
+                    ? const Color.fromARGB(255, 0, 200, 255)
                     : Colors.white,
               ),
-              onPressed: () {
-                // Handle profile button press
-                setState(
-                  () {
-                    _selectedIndex = 4;
-                  },
-                );
-              },
+
+              onPressed: () => _onItemTapped(4),
             ),
           ],
         ),

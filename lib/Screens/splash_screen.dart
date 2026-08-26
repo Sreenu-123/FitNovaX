@@ -1,50 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/login_screen.dart';
 
-class SplashScreen
-    extends
-        StatefulWidget {
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
-  State<
-    SplashScreen
-  >
-  createState() =>
-      _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState
-    extends
-        State<
-          SplashScreen
-        > {
+class _SplashScreenState extends State<SplashScreen> {
   @override
-  void
-  initState() {
+  void initState() {
     super.initState();
-    Future.delayed(
-      Duration(
-        seconds: 3,
-      ),
-      () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (
-                  context,
-                ) => LoginScreen(),
-          ),
-        );
-      },
-    );
+    Future.delayed(Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    });
   }
 
   @override
-  Widget
-  build(
-    BuildContext
-    context,
-  ) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -66,25 +43,15 @@ class _SplashScreenState
               children: [
                 Text(
                   'FitNovaX',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 33,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 33),
                 ),
 
-                SizedBox(
-                  height: 0,
-                ),
+                SizedBox(height: 0),
 
                 Text(
                   'Train. Level Up. Conquer',
                   style: TextStyle(
-                    color: Color.fromARGB(
-                      255,
-                      198,
-                      197,
-                      197,
-                    ),
+                    color: Color.fromARGB(255, 198, 197, 197),
                     fontSize: 13,
                   ),
                 ),

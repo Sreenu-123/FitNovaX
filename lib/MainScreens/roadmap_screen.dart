@@ -1,43 +1,24 @@
 import 'package:flutter/material.dart';
 
-class RoadmapScreen
-    extends
-        StatefulWidget {
+class RoadmapScreen extends StatefulWidget {
+  const RoadmapScreen({super.key});
+
   @override
-  State<
-    RoadmapScreen
-  >
-  createState() =>
-      _RoadmapScreenState();
+  State<RoadmapScreen> createState() => _RoadmapScreenState();
 }
 
-class _RoadmapScreenState
-    extends
-        State<
-          RoadmapScreen
-        > {
+class _RoadmapScreenState extends State<RoadmapScreen> {
   @override
-  Widget
-  build(
-    BuildContext
-    context,
-  ) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: const Text(
-          'Roadmap',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
+        title: const Text('Roadmap', style: TextStyle(color: Colors.white)),
       ),
       body: const Padding(
-        padding: EdgeInsets.all(
-          20,
-        ),
+        padding: EdgeInsets.all(20),
         child: Text(
           'Your Roadmap',
           style: TextStyle(
