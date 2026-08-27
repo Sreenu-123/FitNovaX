@@ -16,6 +16,11 @@ class _DietScreenState extends State<DietScreen> {
 
   bool isRegenerating = false;
 
+  final TextEditingController foodController = TextEditingController();
+  final TextEditingController caloriesController = TextEditingController();
+
+  String selectedMealType = 'Breakfast';
+
   final List<Map<String, String>> days = [
     {'day': 'Today', 'date': '21'},
     {'day': 'Tue', 'date': '22'},
@@ -87,6 +92,13 @@ class _DietScreenState extends State<DietScreen> {
       'icon': Icons.dinner_dining_rounded,
     },
   ];
+
+  @override
+  void dispose() {
+    foodController.dispose();
+    caloriesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -364,13 +376,15 @@ class _DietScreenState extends State<DietScreen> {
 
         const SizedBox(height: 12),
 
-        // ---------------- LOG FOOD ----------------
+        // ===========================================================
+        // LOG FOOD BUTTON
+        // ===========================================================
         SizedBox(
           width: double.infinity,
           height: 56,
 
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: _showLogFoodSheet,
 
             style: ElevatedButton.styleFrom(
               backgroundColor: blue,
@@ -397,6 +411,331 @@ class _DietScreenState extends State<DietScreen> {
   }
 
   // ===============================================================
+  // LOG FOOD BOTTOM SHEET
+  // ===============================================================
+
+  void _showLogFoodSheet() {
+    foodController.clear();
+    caloriesController.clear();
+
+    selectedMealType = 'Breakfast';
+
+    showModalBottomSheet(
+      context: context,
+
+      isScrollControlled: true,
+
+      backgroundColor: const Color(0xFF0B1722),
+
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 22,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      // HEADER
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                        children: [
+                          const Text(
+                            'Log Food',
+
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 21,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      const Text(
+                        'Add the food you have eaten today.',
+
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+
+                      const SizedBox(height: 22),
+
+                      // FOOD NAME
+                      const Text(
+                        'Food Name',
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextField(
+                        controller: foodController,
+
+                        style: const TextStyle(color: Colors.white),
+
+                        decoration: InputDecoration(
+                          hintText: 'e.g. Chicken Sandwich',
+
+                          hintStyle: const TextStyle(color: Colors.white38),
+
+                          prefixIcon: const Icon(
+                            Icons.restaurant_rounded,
+                            color: Colors.white54,
+                          ),
+
+                          filled: true,
+
+                          fillColor: const Color(0xFF101C28),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // MEAL TYPE
+                      const Text(
+                        'Meal Type',
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF101C28),
+
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedMealType,
+
+                            dropdownColor: const Color(0xFF101C28),
+
+                            isExpanded: true,
+
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.white54,
+                            ),
+
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'Breakfast',
+                                child: Text('Breakfast'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Lunch',
+                                child: Text('Lunch'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Snack',
+                                child: Text('Snack'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Dinner',
+                                child: Text('Dinner'),
+                              ),
+                            ],
+
+                            onChanged: (value) {
+                              if (value == null) return;
+
+                              setSheetState(() {
+                                selectedMealType = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // CALORIES
+                      const Text(
+                        'Calories',
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextField(
+                        controller: caloriesController,
+
+                        keyboardType: TextInputType.number,
+
+                        style: const TextStyle(color: Colors.white),
+
+                        decoration: InputDecoration(
+                          hintText: 'e.g. 450',
+
+                          hintStyle: const TextStyle(color: Colors.white38),
+
+                          suffixText: 'kcal',
+
+                          suffixStyle: TextStyle(
+                            color: blue,
+                            fontWeight: FontWeight.w600,
+                          ),
+
+                          prefixIcon: const Icon(
+                            Icons.local_fire_department_rounded,
+                            color: Colors.orangeAccent,
+                          ),
+
+                          filled: true,
+
+                          fillColor: const Color(0xFF101C28),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // SAVE BUTTON
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _saveFood(context);
+                          },
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: blue,
+
+                            elevation: 0,
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                          ),
+
+                          child: const Text(
+                            'Save Food',
+
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ===============================================================
+  // SAVE FOOD
+  // ===============================================================
+
+  void _saveFood(BuildContext sheetContext) {
+    final String foodName = foodController.text.trim();
+
+    final String calories = caloriesController.text.trim();
+
+    if (foodName.isEmpty || calories.isEmpty) {
+      ScaffoldMessenger.of(sheetContext).showSnackBar(
+        const SnackBar(content: Text('Please enter food name and calories.')),
+      );
+
+      return;
+    }
+
+    setState(() {
+      meals.add({
+        'name': selectedMealType,
+        'time': 'Just now',
+        'food': foodName,
+        'calories': '$calories kcal',
+        'icon': selectedMealType == 'Breakfast'
+            ? Icons.free_breakfast_rounded
+            : selectedMealType == 'Lunch'
+            ? Icons.restaurant_rounded
+            : selectedMealType == 'Snack'
+            ? Icons.local_drink_rounded
+            : Icons.dinner_dining_rounded,
+      });
+    });
+
+    Navigator.pop(sheetContext);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$foodName added to your meals!')));
+  }
+
+  // ===============================================================
   // AI DIET
   // ===============================================================
 
@@ -407,9 +746,6 @@ class _DietScreenState extends State<DietScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-        // ===========================================================
-        // AI PLAN HEADER
-        // ===========================================================
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
@@ -473,9 +809,6 @@ class _DietScreenState extends State<DietScreen> {
 
         const SizedBox(height: 18),
 
-        // ===========================================================
-        // MACRO CARDS
-        // ===========================================================
         Row(
           children: [
             Expanded(
@@ -513,9 +846,6 @@ class _DietScreenState extends State<DietScreen> {
 
         const SizedBox(height: 24),
 
-        // ===========================================================
-        // AI GENERATED PLAN
-        // ===========================================================
         const Text(
           'AI Generated Plan',
 
@@ -540,9 +870,6 @@ class _DietScreenState extends State<DietScreen> {
 
         const SizedBox(height: 12),
 
-        // ===========================================================
-        // AI MEALS
-        // ===========================================================
         Column(
           children: aiMeals.map((meal) {
             return Padding(
@@ -561,9 +888,6 @@ class _DietScreenState extends State<DietScreen> {
 
         const SizedBox(height: 12),
 
-        // ===========================================================
-        // REGENERATE BUTTON
-        // ===========================================================
         SizedBox(
           width: double.infinity,
           height: 69,
@@ -751,7 +1075,6 @@ class _DietScreenState extends State<DietScreen> {
 
       child: Row(
         children: [
-          // IMAGE / FOOD ICON
           Container(
             height: 60,
             width: 60,
@@ -767,7 +1090,6 @@ class _DietScreenState extends State<DietScreen> {
 
           const SizedBox(width: 11),
 
-          // FOOD DETAILS
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
