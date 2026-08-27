@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:fit_nova_x/MenuScreens/body_stats_screen.dart';
+import 'package:fit_nova_x/MenuScreens/progress_photos_screen.dart';
+import 'package:fit_nova_x/MenuScreens/sleep_tracker_screen.dart';
+import 'package:fit_nova_x/MenuScreens/water_tracker_screen.dart';
+import 'package:fit_nova_x/MenuScreens/reminder_screen.dart';
+import 'package:fit_nova_x/MenuScreens/achievements_screen.dart';
+import 'package:fit_nova_x/MenuScreens/supplements_screen.dart';
+import 'package:fit_nova_x/MenuScreens/health_records_screen.dart';
+import 'package:fit_nova_x/MenuScreens/settings_screen.dart';
+import 'package:fit_nova_x/MenuScreens/help_support_screen.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -51,70 +61,140 @@ class _MenuScreenState extends State<MenuScreen> {
                 icon: Icons.grid_view_rounded,
                 title: 'Body Stats',
                 subtitle: 'Track your body measurements',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BodyStatsScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.photo_library_outlined,
                 title: 'Progress Photos',
                 subtitle: 'Visualize your transformation',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProgressPhotosScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.bedtime_outlined,
                 title: 'Sleep Tracker',
                 subtitle: 'Track your sleep and recovery',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SleepTrackerScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.water_drop_outlined,
                 title: 'Water Tracker',
                 subtitle: 'Stay hydrated, stay healthy',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WaterTrackerScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.notifications_none_rounded,
                 title: 'Reminders',
                 subtitle: 'Never miss your workouts',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ReminderScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.workspace_premium_outlined,
                 title: 'Achievements',
                 subtitle: 'Your badges and milestones',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AchievementsScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.medication_outlined,
                 title: 'Supplements',
                 subtitle: 'Manage your supplements',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SupplementsScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.health_and_safety_outlined,
                 title: 'Health Records',
                 subtitle: 'Store your health data',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HealthRecordsScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.settings_outlined,
                 title: 'Settings',
                 subtitle: 'App preferences and settings',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
               ),
 
               _menuCard(
                 icon: Icons.help_outline_rounded,
                 title: 'Help & Support',
                 subtitle: 'Get help and contact us',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HelpSupportScreen(),
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 10),
