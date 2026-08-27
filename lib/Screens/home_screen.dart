@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fit_nova_x/ProfileScreen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onWorkoutTap;
@@ -46,8 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: CircleAvatar(
               radius: 17,
-              backgroundColor: Color.fromARGB(255, 25, 35, 45),
-              child: Icon(Icons.person, color: blue, size: 20),
+              backgroundColor: const Color.fromARGB(255, 25, 35, 45),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(
+                  Icons.person,
+                  color: Color.fromARGB(255, 0, 174, 239),
+                  size: 20,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
