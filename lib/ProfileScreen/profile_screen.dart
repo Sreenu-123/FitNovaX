@@ -302,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
 
-                    Icon(
+                    const Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Colors.white38,
                       size: 14,
@@ -383,8 +383,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 'Change Password',
                 () {},
               ),
-
-              _accountItem(Icons.logout_rounded, 'Log Out', () {}),
             ],
           ),
         ),
@@ -489,6 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+
         children: [
           Icon(icon, color: blue, size: 25),
 

@@ -14,6 +14,8 @@ class _DietScreenState extends State<DietScreen> {
   int selectedDiet = 0;
   int selectedDay = 0;
 
+  bool isRegenerating = false;
+
   final List<Map<String, String>> days = [
     {'day': 'Today', 'date': '21'},
     {'day': 'Tue', 'date': '22'},
@@ -55,6 +57,37 @@ class _DietScreenState extends State<DietScreen> {
     },
   ];
 
+  final List<Map<String, dynamic>> aiMeals = [
+    {
+      'name': 'Breakfast',
+      'time': '8:00 AM',
+      'food': 'Power Energy, Brown Bread, Banana, Almonds',
+      'calories': '520 kcal',
+      'icon': Icons.free_breakfast_rounded,
+    },
+    {
+      'name': 'Lunch',
+      'time': '1:00 PM',
+      'food': 'Chicken Breast, Brown Rice, Mixed Veggies, Salad',
+      'calories': '650 kcal',
+      'icon': Icons.restaurant_rounded,
+    },
+    {
+      'name': 'Snack',
+      'time': '4:30 PM',
+      'food': 'Whey Protein Shake, Peanut Butter, Apple',
+      'calories': '300 kcal',
+      'icon': Icons.local_drink_rounded,
+    },
+    {
+      'name': 'Dinner',
+      'time': '8:00 PM',
+      'food': 'Grilled Fish, Quinoa, Steamed Vegetables',
+      'calories': '550 kcal',
+      'icon': Icons.dinner_dining_rounded,
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +100,9 @@ class _DietScreenState extends State<DietScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ---------------- HEADER ----------------
+              // =====================================================
+              // HEADER
+              // =====================================================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -93,7 +128,9 @@ class _DietScreenState extends State<DietScreen> {
 
               const SizedBox(height: 10),
 
-              // ---------------- DIET TOGGLE ----------------
+              // =====================================================
+              // DIET TOGGLE
+              // =====================================================
               Container(
                 height: 48,
                 padding: const EdgeInsets.all(4),
@@ -107,220 +144,20 @@ class _DietScreenState extends State<DietScreen> {
                   children: [
                     Expanded(child: _dietTab(title: 'Normal Diet', index: 0)),
 
-                    Expanded(child: _dietTab(title: 'AI Diet', index: 1)),
+                    Expanded(child: _dietTab(title: 'AI Diet ✨', index: 1)),
                   ],
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // ---------------- DATE SELECTOR ----------------
-              SizedBox(
-                height: 68,
+              // =====================================================
+              // NORMAL / AI DIET
+              // =====================================================
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
 
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: days.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 7),
-
-                  itemBuilder: (context, index) {
-                    final isSelected = selectedDay == index;
-
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedDay = index;
-                        });
-                      },
-
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-
-                        width: 48,
-
-                        decoration: BoxDecoration(
-                          color: isSelected ? blue : const Color(0xFF101821),
-
-                          borderRadius: BorderRadius.circular(11),
-
-                          border: Border.all(
-                            color: isSelected ? blue : const Color(0xFF18222D),
-                          ),
-                        ),
-
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Text(
-                              days[index]['day']!,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-
-                            const SizedBox(height: 5),
-
-                            Text(
-                              days[index]['date']!,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // ---------------- CALORIE SUMMARY ----------------
-              const Text(
-                'Calorie Summary',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Row(
-                children: [
-                  SizedBox(
-                    height: 175,
-                    width: 175,
-
-                    child: CustomPaint(
-                      painter: _CaloriePainter(),
-
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: const [
-                            Text(
-                              '1450',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-
-                            Text(
-                              '/2100 kcal',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 25),
-
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _macroRow(
-                          color: Colors.blue,
-                          name: 'Protein',
-                          value: '120 / 150g',
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        _macroRow(
-                          color: Colors.deepPurpleAccent,
-                          name: 'Carbs',
-                          value: '180 / 250g',
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        _macroRow(
-                          color: Colors.cyan,
-                          name: 'Fats',
-                          value: '45 / 70g',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // ---------------- TODAY'S MEALS ----------------
-              const Text(
-                "Today's Meals",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Column(
-                children: meals.map((meal) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 9),
-
-                    child: _mealCard(
-                      name: meal['name'],
-                      time: meal['time'],
-                      food: meal['food'],
-                      calories: meal['calories'],
-                      icon: meal['icon'],
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ---------------- LOG FOOD ----------------
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-
-                child: ElevatedButton(
-                  onPressed: () {},
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: blue,
-                    elevation: 0,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                  ),
-
-                  child: const Text(
-                    '+ Log Food',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+                child: selectedDiet == 0 ? _buildNormalDiet() : _buildAiDiet(),
               ),
             ],
           ),
@@ -329,7 +166,465 @@ class _DietScreenState extends State<DietScreen> {
     );
   }
 
-  // ---------------- DIET TAB ----------------
+  // ===============================================================
+  // NORMAL DIET
+  // ===============================================================
+
+  Widget _buildNormalDiet() {
+    return Column(
+      key: const ValueKey('normalDiet'),
+
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        // ---------------- DATE SELECTOR ----------------
+        SizedBox(
+          height: 68,
+
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: days.length,
+
+            separatorBuilder: (_, __) => const SizedBox(width: 7),
+
+            itemBuilder: (context, index) {
+              final isSelected = selectedDay == index;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedDay = index;
+                  });
+                },
+
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+
+                  width: 48,
+
+                  decoration: BoxDecoration(
+                    color: isSelected ? blue : const Color(0xFF101821),
+
+                    borderRadius: BorderRadius.circular(11),
+
+                    border: Border.all(
+                      color: isSelected ? blue : const Color(0xFF18222D),
+                    ),
+                  ),
+
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Text(
+                        days[index]['day']!,
+
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.white70,
+
+                          fontSize: 12,
+
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      Text(
+                        days[index]['date']!,
+
+                        style: const TextStyle(
+                          color: Colors.white,
+
+                          fontSize: 14,
+
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 30),
+
+        // ---------------- CALORIE SUMMARY ----------------
+        const Text(
+          'Calorie Summary',
+
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        const SizedBox(height: 15),
+
+        Row(
+          children: [
+            SizedBox(
+              height: 175,
+              width: 175,
+
+              child: CustomPaint(
+                painter: _CaloriePainter(),
+
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: const [
+                      Text(
+                        '1450',
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      Text(
+                        '/2100 kcal',
+
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 25),
+
+            Expanded(
+              child: Column(
+                children: [
+                  _macroRow(
+                    color: Colors.blue,
+                    name: 'Protein',
+                    value: '120 / 150g',
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  _macroRow(
+                    color: Colors.deepPurpleAccent,
+                    name: 'Carbs',
+                    value: '180 / 250g',
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  _macroRow(
+                    color: Colors.cyan,
+                    name: 'Fats',
+                    value: '45 / 70g',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // ---------------- TODAY'S MEALS ----------------
+        const Text(
+          "Today's Meals",
+
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        Column(
+          children: meals.map((meal) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+
+              child: _mealCard(
+                name: meal['name'],
+                time: meal['time'],
+                food: meal['food'],
+                calories: meal['calories'],
+                icon: meal['icon'],
+              ),
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 12),
+
+        // ---------------- LOG FOOD ----------------
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+
+          child: ElevatedButton(
+            onPressed: () {},
+
+            style: ElevatedButton.styleFrom(
+              backgroundColor: blue,
+              elevation: 0,
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(13),
+              ),
+            ),
+
+            child: const Text(
+              '+ Log Food',
+
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===============================================================
+  // AI DIET
+  // ===============================================================
+
+  Widget _buildAiDiet() {
+    return Column(
+      key: const ValueKey('aiDiet'),
+
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        // ===========================================================
+        // AI PLAN HEADER
+        // ===========================================================
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          crossAxisAlignment: CrossAxisAlignment.end,
+
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                const Text(
+                  'Your AI Diet Plan',
+
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 7),
+
+                Text(
+                  '2,200 kcal / day',
+
+                  style: TextStyle(
+                    color: blue,
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+
+            OutlinedButton(
+              onPressed: _editPreferences,
+
+              style: OutlinedButton.styleFrom(
+                backgroundColor: const Color(0xFF101821),
+
+                side: const BorderSide(color: Color(0xFF182633)),
+
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 8,
+                ),
+
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(9),
+                ),
+              ),
+
+              child: const Text(
+                'Edit Preferences',
+
+                style: TextStyle(color: Colors.white70, fontSize: 10),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        // ===========================================================
+        // MACRO CARDS
+        // ===========================================================
+        Row(
+          children: [
+            Expanded(
+              child: _aiMacroCard(
+                icon: Icons.fitness_center_rounded,
+                title: 'Protein',
+                value: '150g',
+                color: Colors.blue,
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            Expanded(
+              child: _aiMacroCard(
+                icon: Icons.grain_rounded,
+                title: 'Carbs',
+                value: '250g',
+                color: Colors.deepPurpleAccent,
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            Expanded(
+              child: _aiMacroCard(
+                icon: Icons.water_drop_outlined,
+                title: 'Fats',
+                value: '70g',
+                color: Colors.greenAccent,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // ===========================================================
+        // AI GENERATED PLAN
+        // ===========================================================
+        const Text(
+          'AI Generated Plan',
+
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          'Based on your goal: Muscle Gain',
+
+          style: TextStyle(
+            color: blue,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // ===========================================================
+        // AI MEALS
+        // ===========================================================
+        Column(
+          children: aiMeals.map((meal) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+
+              child: _aiMealCard(
+                name: meal['name'],
+                time: meal['time'],
+                food: meal['food'],
+                calories: meal['calories'],
+                icon: meal['icon'],
+              ),
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 12),
+
+        // ===========================================================
+        // REGENERATE BUTTON
+        // ===========================================================
+        SizedBox(
+          width: double.infinity,
+          height: 69,
+
+          child: ElevatedButton(
+            onPressed: isRegenerating ? null : _regeneratePlan,
+
+            style: ElevatedButton.styleFrom(
+              backgroundColor: blue,
+
+              disabledBackgroundColor: blue.withValues(alpha: 0.6),
+
+              elevation: 0,
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(13),
+              ),
+            ),
+
+            child: isRegenerating
+                ? const SizedBox(
+                    height: 23,
+                    width: 23,
+
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Text(
+                        '⟳  Regenerate Plan',
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      SizedBox(height: 4),
+
+                      Text(
+                        'AI will update your plan',
+
+                        style: TextStyle(color: Colors.white70, fontSize: 10),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===============================================================
+  // DIET TAB
+  // ===============================================================
 
   Widget _dietTab({required String title, required int index}) {
     final bool isSelected = selectedDiet == index;
@@ -346,6 +641,7 @@ class _DietScreenState extends State<DietScreen> {
 
         decoration: BoxDecoration(
           color: isSelected ? blue : Colors.transparent,
+
           borderRadius: BorderRadius.circular(9),
         ),
 
@@ -353,9 +649,11 @@ class _DietScreenState extends State<DietScreen> {
 
         child: Text(
           title,
+
           style: TextStyle(
             color: Colors.white,
             fontSize: 14,
+
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -363,7 +661,174 @@ class _DietScreenState extends State<DietScreen> {
     );
   }
 
-  // ---------------- MACRO ROW ----------------
+  // ===============================================================
+  // AI MACRO CARD
+  // ===============================================================
+
+  Widget _aiMacroCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      height: 96,
+
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1622),
+
+        borderRadius: BorderRadius.circular(12),
+
+        border: Border.all(color: const Color(0xFF172534)),
+      ),
+
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+
+        children: [
+          Container(
+            height: 25,
+            width: 25,
+
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+
+              shape: BoxShape.circle,
+            ),
+
+            child: Icon(icon, color: color, size: 15),
+          ),
+
+          const SizedBox(height: 7),
+
+          Text(
+            title,
+
+            style: const TextStyle(color: Colors.white70, fontSize: 10),
+          ),
+
+          const SizedBox(height: 2),
+
+          Text(
+            value,
+
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===============================================================
+  // AI MEAL CARD
+  // ===============================================================
+
+  Widget _aiMealCard({
+    required String name,
+    required String time,
+    required String food,
+    required String calories,
+    required IconData icon,
+  }) {
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.all(9),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B1722),
+
+        borderRadius: BorderRadius.circular(13),
+
+        border: Border.all(color: const Color(0xFF172634)),
+      ),
+
+      child: Row(
+        children: [
+          // IMAGE / FOOD ICON
+          Container(
+            height: 60,
+            width: 60,
+
+            decoration: BoxDecoration(
+              color: const Color(0xFF17232D),
+
+              borderRadius: BorderRadius.circular(11),
+            ),
+
+            child: Icon(icon, color: Colors.orangeAccent, size: 30),
+          ),
+
+          const SizedBox(width: 11),
+
+          // FOOD DETAILS
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Text(
+                  name,
+
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  time,
+
+                  style: const TextStyle(color: Colors.white54, fontSize: 10),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  food,
+
+                  maxLines: 2,
+
+                  overflow: TextOverflow.ellipsis,
+
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 7),
+
+          Text(
+            calories,
+
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===============================================================
+  // NORMAL MACRO ROW
+  // ===============================================================
 
   Widget _macroRow({
     required Color color,
@@ -383,9 +848,11 @@ class _DietScreenState extends State<DietScreen> {
 
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
             Text(
               name,
+
               style: const TextStyle(color: Colors.white, fontSize: 13),
             ),
 
@@ -393,6 +860,7 @@ class _DietScreenState extends State<DietScreen> {
 
             Text(
               value,
+
               style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
@@ -401,7 +869,9 @@ class _DietScreenState extends State<DietScreen> {
     );
   }
 
-  // ---------------- MEAL CARD ----------------
+  // ===============================================================
+  // NORMAL MEAL CARD
+  // ===============================================================
 
   Widget _mealCard({
     required String name,
@@ -412,10 +882,12 @@ class _DietScreenState extends State<DietScreen> {
   }) {
     return Container(
       width: double.infinity,
+
       padding: const EdgeInsets.all(9),
 
       decoration: BoxDecoration(
         color: const Color(0xFF0D151E),
+
         borderRadius: BorderRadius.circular(13),
 
         border: Border.all(color: const Color(0xFF17232F)),
@@ -429,6 +901,7 @@ class _DietScreenState extends State<DietScreen> {
 
             decoration: BoxDecoration(
               color: const Color(0xFF17202A),
+
               borderRadius: BorderRadius.circular(11),
             ),
 
@@ -444,6 +917,7 @@ class _DietScreenState extends State<DietScreen> {
               children: [
                 Text(
                   name,
+
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -455,6 +929,7 @@ class _DietScreenState extends State<DietScreen> {
 
                 Text(
                   time,
+
                   style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
 
@@ -462,7 +937,9 @@ class _DietScreenState extends State<DietScreen> {
 
                 Text(
                   food,
+
                   maxLines: 1,
+
                   overflow: TextOverflow.ellipsis,
 
                   style: const TextStyle(color: Colors.white70, fontSize: 11),
@@ -475,6 +952,7 @@ class _DietScreenState extends State<DietScreen> {
 
           Text(
             calories,
+
             style: const TextStyle(
               color: Colors.white,
               fontSize: 11,
@@ -485,11 +963,173 @@ class _DietScreenState extends State<DietScreen> {
       ),
     );
   }
+
+  // ===============================================================
+  // EDIT PREFERENCES
+  // ===============================================================
+
+  void _editPreferences() {
+    showModalBottomSheet(
+      context: context,
+
+      backgroundColor: const Color(0xFF0B1722),
+
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(22),
+
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                const Text(
+                  'AI Diet Preferences',
+
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  'Update your preferences to personalize your AI generated diet plan.',
+
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+
+                const SizedBox(height: 20),
+
+                _preferenceItem(Icons.flag_outlined, 'Goal', 'Build Muscle'),
+
+                _preferenceItem(
+                  Icons.local_fire_department_outlined,
+                  'Daily Calories',
+                  '2,200 kcal',
+                ),
+
+                _preferenceItem(
+                  Icons.restaurant_outlined,
+                  'Diet Type',
+                  'Balanced',
+                ),
+
+                const SizedBox(height: 10),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: blue,
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+
+                    child: const Text(
+                      'Save Preferences',
+
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ===============================================================
+  // PREFERENCE ITEM
+  // ===============================================================
+
+  Widget _preferenceItem(IconData icon, String title, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 9),
+
+      padding: const EdgeInsets.all(13),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF101C28),
+
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Row(
+        children: [
+          Icon(icon, color: blue, size: 21),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Text(
+              title,
+
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
+            ),
+          ),
+
+          Text(
+            value,
+
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===============================================================
+  // REGENERATE AI PLAN
+  // ===============================================================
+
+  Future<void> _regeneratePlan() async {
+    setState(() {
+      isRegenerating = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    setState(() {
+      isRegenerating = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Your AI diet plan has been regenerated!')),
+    );
+  }
 }
 
-// ============================================================
+// ===============================================================
 // CALORIE RING
-// ============================================================
+// ===============================================================
 
 class _CaloriePainter extends CustomPainter {
   @override
