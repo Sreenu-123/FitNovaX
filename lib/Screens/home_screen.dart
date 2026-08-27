@@ -183,6 +183,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
+              const SizedBox(height: 16),
+
+              // ================= STREAK + ACHIEVEMENT =================
+              Row(
+                children: [
+                  Expanded(
+                    child: _statCard(
+                      icon: Icons.local_fire_department_rounded,
+                      title: 'Current Streak',
+                      value: '7 Days',
+                      iconColor: Colors.orange,
+                    ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  Expanded(
+                    child: _statCard(
+                      icon: Icons.emoji_events_rounded,
+                      title: 'Latest Achievement',
+                      value: '7 Day Streak',
+                      iconColor: Colors.amber,
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 25),
 
               // ================= TODAY'S OVERVIEW =================
@@ -347,6 +374,80 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // STREAK / ACHIEVEMENT CARD
+  // ============================================================
+
+  Widget _statCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Container(
+      height: 78,
+
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 12, 18, 25),
+
+        borderRadius: BorderRadius.circular(15),
+
+        border: Border.all(color: const Color.fromARGB(255, 30, 40, 50)),
+      ),
+
+      child: Row(
+        children: [
+          Container(
+            height: 38,
+            width: 38,
+
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+
+            child: Icon(icon, color: iconColor, size: 21),
+          ),
+
+          const SizedBox(width: 9),
+
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+
+                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

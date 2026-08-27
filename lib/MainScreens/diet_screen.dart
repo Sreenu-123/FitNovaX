@@ -22,7 +22,7 @@ class _DietScreenState extends State<DietScreen> {
   String selectedMealType = 'Breakfast';
 
   final List<Map<String, String>> days = [
-    {'day': 'Today', 'date': '21'},
+    {'day': 'Mon', 'date': '21'},
     {'day': 'Tue', 'date': '22'},
     {'day': 'Wed', 'date': '23'},
     {'day': 'Thu', 'date': '24'},
