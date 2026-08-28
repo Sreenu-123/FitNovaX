@@ -11,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Color blue = const Color.fromARGB(255, 34, 174, 239);
+  final Color blue = const Color.fromARGB(255, 0, 140, 255);
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: const Color.fromARGB(255, 25, 35, 45),
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(
-                  Icons.person,
-                  color: Color.fromARGB(255, 0, 174, 239),
-                  size: 20,
-                ),
+                icon: Icon(Icons.person, color: blue, size: 20),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -110,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(18),
 
                     gradient: LinearGradient(
-                      colors: [blue, const Color.fromARGB(255, 20, 80, 180)],
+                      colors: [blue, const Color.fromARGB(255, 10, 55, 130)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
