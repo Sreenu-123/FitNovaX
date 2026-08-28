@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fit_nova_x/MainScreens/main_screen.dart';
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
+import 'package:fit_nova_x/Screens/personal_details_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -189,9 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 50,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MainScreen()),
+            MaterialPageRoute(
+              builder: (context) => const PersonalDetailsScreen(),
+            ),
           );
         },
         style: ElevatedButton.styleFrom(
