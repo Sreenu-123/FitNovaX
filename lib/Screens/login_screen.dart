@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/MainScreens/main_screen.dart';
+import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -303,6 +304,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         TextButton(
           onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignUpScreen()),
+            );
             // TODO: Sign up navigation
           },
           child: const Text(

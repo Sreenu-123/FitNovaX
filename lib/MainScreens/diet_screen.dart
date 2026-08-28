@@ -197,7 +197,7 @@ class _DietScreenState extends State<DietScreen> {
             scrollDirection: Axis.horizontal,
             itemCount: days.length,
 
-            separatorBuilder: (_, __) => const SizedBox(width: 7),
+            separatorBuilder: (_, _) => const SizedBox(width: 7),
 
             itemBuilder: (context, index) {
               final isSelected = selectedDay == index;
