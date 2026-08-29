@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:fit_nova_x/Screens/founder_note_screen.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
@@ -19,12 +21,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
-
   final TextEditingController heightController = TextEditingController();
-
   final TextEditingController weightController = TextEditingController();
-
   final TextEditingController phoneController = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   DateTime? selectedDate;
 
@@ -34,7 +37,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   File? selectedImage;
 
-  final ImagePicker _picker = ImagePicker();
+  bool isSaving = false;
 
   final List<String> countryCodes = ['+91', '+1', '+44', '+61', '+971', '+65'];
 
@@ -55,15 +58,25 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   // ===============================================================
 
   Future<void> _pickProfileImage() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
 
-    if (image != null) {
+      if (image == null) {
+        return;
+      }
+
       setState(() {
         selectedImage = File(image.path);
       });
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not select profile photo')),
+      );
     }
   }
 
@@ -100,10 +113,40 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   }
 
   // ===============================================================
-  // CONTINUE
+  // UPLOAD PROFILE IMAGE
   // ===============================================================
 
-  void _continue() {
+  Future<String?> _uploadProfileImage(String userId) async {
+    if (selectedImage == null) {
+      return null;
+    }
+
+    final String filePath =
+        '$userId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    await _supabase.storage
+        .from('profile-images')
+        .upload(
+          filePath,
+          selectedImage!,
+          fileOptions: const FileOptions(
+            upsert: true,
+            contentType: 'image/jpeg',
+          ),
+        );
+
+    final String imageUrl = _supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+
+    return imageUrl;
+  }
+
+  // ===============================================================
+  // SAVE PROFILE
+  // ===============================================================
+
+  Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -124,10 +167,97 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FounderNoteScreen()),
-    );
+    final User? user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please login again')));
+
+      return;
+    }
+
+    setState(() {
+      isSaving = true;
+    });
+
+    try {
+      // -----------------------------------------------------------
+      // Upload profile image if selected
+      // -----------------------------------------------------------
+
+      String? profileImageUrl;
+
+      if (selectedImage != null) {
+        profileImageUrl = await _uploadProfileImage(user.id);
+      }
+
+      // -----------------------------------------------------------
+      // Save profile data
+      // -----------------------------------------------------------
+
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'name': nameController.text.trim(),
+        'date_of_birth': _formatDateForDatabase(selectedDate!),
+        'gender': selectedGender,
+        'height': double.parse(heightController.text.trim()),
+        'weight': double.parse(weightController.text.trim()),
+        'phone': phoneController.text.trim(),
+        'country_code': selectedCountryCode,
+        'profile_image_url': profileImageUrl,
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile saved successfully')),
+      );
+
+      // -----------------------------------------------------------
+      // Move to Founder Note
+      // -----------------------------------------------------------
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const FounderNoteScreen()),
+      );
+    } on StorageException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image upload failed: ${error.message}')),
+      );
+    } on PostgrestException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile save failed: ${error.message}')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Something went wrong: $error')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSaving = false;
+        });
+      }
+    }
+  }
+
+  // ===============================================================
+  // FORMAT DATE FOR SUPABASE
+  // ===============================================================
+
+  String _formatDateForDatabase(DateTime date) {
+    final String month = date.month.toString().padLeft(2, '0');
+    final String day = date.day.toString().padLeft(2, '0');
+
+    return '${date.year}-$month-$day';
   }
 
   // ===============================================================
@@ -149,12 +279,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 // =====================================================
                 // BACK BUTTON
                 // =====================================================
+
                 IconButton(
-                  onPressed: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
                   padding: EdgeInsets.zero,
                   icon: const Icon(
                     Icons.arrow_back_ios_new_rounded,
@@ -233,7 +366,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                               ),
                               child: IconButton(
                                 padding: EdgeInsets.zero,
-                                onPressed: _pickProfileImage,
+                                onPressed: isSaving ? null : _pickProfileImage,
                                 icon: const Icon(
                                   Icons.camera_alt_rounded,
                                   color: Colors.white,
@@ -248,7 +381,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       const SizedBox(height: 9),
 
                       GestureDetector(
-                        onTap: _pickProfileImage,
+                        onTap: isSaving ? null : _pickProfileImage,
                         child: const Text(
                           'Add Profile Photo',
                           style: TextStyle(
@@ -303,7 +436,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 const SizedBox(height: 8),
 
                 GestureDetector(
-                  onTap: _selectDate,
+                  onTap: isSaving ? null : _selectDate,
                   child: AbsorbPointer(
                     child: TextFormField(
                       style: const TextStyle(color: Colors.white),
@@ -337,14 +470,23 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     hintText: 'Select your gender',
                     icon: Icons.wc_outlined,
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select your gender';
+                    }
+
+                    return null;
+                  },
                   items: genders.map((gender) {
                     return DropdownMenuItem(value: gender, child: Text(gender));
                   }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedGender = value;
-                    });
-                  },
+                  onChanged: isSaving
+                      ? null
+                      : (value) {
+                          setState(() {
+                            selectedGender = value;
+                          });
+                        },
                 ),
 
                 const SizedBox(height: 20),
@@ -366,7 +508,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             controller: heightController,
                             cursorColor: primaryColor,
                             style: const TextStyle(color: Colors.white),
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             decoration: _inputDecoration(
                               hintText: 'Height (cm)',
                               icon: Icons.height_rounded,
@@ -376,7 +520,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                                 return 'Required';
                               }
 
-                              final height = double.tryParse(value);
+                              final double? height = double.tryParse(
+                                value.trim(),
+                              );
 
                               if (height == null ||
                                   height < 50 ||
@@ -405,7 +551,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             controller: weightController,
                             cursorColor: primaryColor,
                             style: const TextStyle(color: Colors.white),
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             decoration: _inputDecoration(
                               hintText: 'Weight (kg)',
                               icon: Icons.monitor_weight_outlined,
@@ -415,7 +563,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                                 return 'Required';
                               }
 
-                              final weight = double.tryParse(value);
+                              final double? weight = double.tryParse(
+                                value.trim(),
+                              );
 
                               if (weight == null ||
                                   weight < 20 ||
@@ -467,13 +617,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                               child: Text(code),
                             );
                           }).toList(),
-                          onChanged: (value) {
-                            if (value == null) return;
+                          onChanged: isSaving
+                              ? null
+                              : (value) {
+                                  if (value == null) return;
 
-                            setState(() {
-                              selectedCountryCode = value;
-                            });
-                          },
+                                  setState(() {
+                                    selectedCountryCode = value;
+                                  });
+                                },
                         ),
                       ),
                     ),
@@ -515,22 +667,34 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _continue,
+                    onPressed: isSaving ? null : _saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
+                      disabledBackgroundColor: primaryColor.withValues(
+                        alpha: 0.5,
+                      ),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: isSaving
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Continue',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
 
