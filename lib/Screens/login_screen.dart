@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fit_nova_x/MainScreens/main_screen.dart';
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
 import 'package:fit_nova_x/Screens/personal_details_screen.dart';

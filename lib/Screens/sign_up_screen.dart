@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/login_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -24,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isPasswordHidden = true;
   bool isConfirmPasswordHidden = true;
   bool termsAccepted = false;
+  bool isCreatingAccount = false;
 
   String selectedCountryCode = '+91';
 
@@ -50,7 +52,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _createAccount() {
+  // ===============================================================
+  // CREATE ACCOUNT
+  // ===============================================================
+
+  Future<void> _createAccount() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -64,10 +70,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+    setState(() {
+      isCreatingAccount = true;
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      final response = await supabase.auth.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+        emailRedirectTo: 'fitnovax://login-callback/',
+        data: {
+          'full_name': nameController.text.trim(),
+          'country_code': selectedCountryCode,
+          'phone_number': phoneController.text.trim(),
+        },
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        isCreatingAccount = false;
+      });
+
+      if (response.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Account created! Please check your email and verify your account.',
+            ),
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isCreatingAccount = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isCreatingAccount = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -84,8 +147,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+
               children: [
+                // =====================================================
                 // LOGO
+                // =====================================================
                 Image.asset(
                   'assets/Images/logoNoBack.png',
                   height: 90,
@@ -94,9 +160,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 20),
 
+                // =====================================================
                 // TITLE
+                // =====================================================
                 const Text(
                   'Create Account',
+
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 21,
@@ -108,20 +177,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const Text(
                   'Start your fitness journey',
+
                   style: TextStyle(color: subtitleColor, fontSize: 13),
                 ),
 
                 const SizedBox(height: 35),
 
+                // =====================================================
                 // NAME
+                // =====================================================
                 TextFormField(
                   controller: nameController,
+
                   cursorColor: primaryColor,
+
                   style: const TextStyle(color: Colors.white),
+
                   textInputAction: TextInputAction.next,
 
                   decoration: InputDecoration(
                     hintText: 'Full Name',
+
                     hintStyle: TextStyle(color: Colors.grey.shade500),
 
                     prefixIcon: const Icon(
@@ -155,16 +231,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
+                // =====================================================
                 // EMAIL
+                // =====================================================
                 TextFormField(
                   controller: emailController,
+
                   cursorColor: primaryColor,
+
                   style: const TextStyle(color: Colors.white),
+
                   keyboardType: TextInputType.emailAddress,
+
                   textInputAction: TextInputAction.next,
 
                   decoration: InputDecoration(
                     hintText: 'Email',
+
                     hintStyle: TextStyle(color: Colors.grey.shade500),
 
                     prefixIcon: const Icon(
@@ -204,9 +287,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
+                // =====================================================
                 // PHONE NUMBER
+                // =====================================================
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
                     // COUNTRY CODE
                     Container(
@@ -244,6 +330,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                               child: Text(
                                 code,
+
                                 style: const TextStyle(color: Colors.white),
                               ),
                             );
@@ -318,9 +405,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
+                // =====================================================
                 // PASSWORD
+                // =====================================================
                 TextFormField(
                   controller: passwordController,
+
                   cursorColor: primaryColor,
 
                   style: const TextStyle(color: Colors.white),
@@ -385,7 +475,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
+                // =====================================================
                 // CONFIRM PASSWORD
+                // =====================================================
                 TextFormField(
                   controller: confirmPasswordController,
 
@@ -451,7 +543,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 15),
 
+                // =====================================================
                 // TERMS
+                // =====================================================
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
 
@@ -505,16 +599,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 15),
 
+                // =====================================================
                 // CREATE ACCOUNT
+                // =====================================================
                 SizedBox(
                   width: double.infinity,
+
                   height: 50,
 
                   child: ElevatedButton(
-                    onPressed: _createAccount,
+                    onPressed: isCreatingAccount ? null : _createAccount,
 
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
+
+                      disabledBackgroundColor: primaryColor.withValues(
+                        alpha: 0.5,
+                      ),
 
                       foregroundColor: Colors.white,
 
@@ -525,20 +626,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       elevation: 0,
                     ),
 
-                    child: const Text(
-                      'Create Account',
+                    child: isCreatingAccount
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
 
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text(
+                            'Create Account',
+
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                   ),
                 ),
 
                 const SizedBox(height: 25),
 
+                // =====================================================
                 // LOGIN
+                // =====================================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
 
