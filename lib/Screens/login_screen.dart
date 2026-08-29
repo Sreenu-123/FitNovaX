@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
 import 'package:fit_nova_x/Screens/personal_details_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,9 +13,20 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
+  bool isSigningIn = false;
 
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildEmailField() {
     return TextField(
+      controller: emailController,
       cursorColor: primaryColor,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
@@ -128,6 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildPasswordField() {
     return TextField(
+      controller: passwordController,
       cursorColor: primaryColor,
       obscureText: isPasswordHidden,
       decoration: InputDecoration(
@@ -163,13 +177,11 @@ class _LoginScreenState extends State<LoginScreen> {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          Navigator.push(
-            context,
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const ForgotPasswordScreen(),
             ),
           );
-          // TODO: Forgot password
         },
         child: const Text(
           'Forgot Password?',
@@ -188,14 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const PersonalDetailsScreen(),
-            ),
-          );
-        },
+        onPressed: isSigningIn ? null : _signIn,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
@@ -204,12 +209,89 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(30),
           ),
         ),
-        child: const Text(
-          'Sign In',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-        ),
+        child: isSigningIn
+            ? const SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text(
+                'Sign In',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+              ),
       ),
     );
+  }
+
+  // ------------------------------------------------------------
+  // SIGN IN
+  // ------------------------------------------------------------
+
+  Future<void> _signIn() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email and password')),
+      );
+      return;
+    }
+
+    if (!email.contains('@gmail.com')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+
+    setState(() {
+      isSigningIn = true;
+    });
+
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      if (response.session != null && response.user != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const PersonalDetailsScreen(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please try again.')),
+        );
+      }
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+        ),
+      );
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        isSigningIn = false;
+      });
+    }
   }
 
   // ------------------------------------------------------------
@@ -244,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
             label: 'Google',
             imageSize: 20,
             onPressed: () {
-              // TODO: Google sign-in
+              // Google sign-in will be added later
             },
           ),
         ),
@@ -257,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
             label: 'Facebook',
             imageSize: 35,
             onPressed: () {
-              // TODO: Facebook sign-in
+              // Facebook sign-in will be added later
             },
           ),
         ),
@@ -313,11 +395,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         TextButton(
           onPressed: () {
-            Navigator.push(
-              context,
+            Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SignUpScreen()),
             );
-            // TODO: Sign up navigation
           },
           child: const Text(
             'Sign Up',

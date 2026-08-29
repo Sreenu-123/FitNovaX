@@ -13,17 +13,23 @@ class PersonalDetailsScreen extends StatefulWidget {
 
 class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
+
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
+
   final TextEditingController heightController = TextEditingController();
+
   final TextEditingController weightController = TextEditingController();
+
   final TextEditingController phoneController = TextEditingController();
 
   DateTime? selectedDate;
+
   String? selectedGender;
+
   String selectedCountryCode = '+91';
 
   File? selectedImage;
@@ -40,6 +46,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     heightController.dispose();
     weightController.dispose();
     phoneController.dispose();
+
     super.dispose();
   }
 
@@ -70,7 +77,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       initialDate: DateTime(2000),
       firstDate: DateTime(1940),
       lastDate: DateTime.now(),
-
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -106,6 +112,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select your date of birth')),
       );
+
       return;
     }
 
@@ -113,6 +120,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select your gender')),
       );
+
       return;
     }
 
@@ -130,28 +138,24 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-
       body: SafeArea(
         child: Form(
           key: _formKey,
-
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 // =====================================================
                 // BACK BUTTON
                 // =====================================================
                 IconButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                   },
-
                   padding: EdgeInsets.zero,
-
                   icon: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     color: Colors.white,
@@ -166,7 +170,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 // =====================================================
                 const Text(
                   'Create Your Profile',
-
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 26,
@@ -178,7 +181,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                 const Text(
                   'Let’s get to know you better.',
-
                   style: TextStyle(color: subtitleColor, fontSize: 13),
                 ),
 
@@ -195,18 +197,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           Container(
                             height: 105,
                             width: 105,
-
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-
                               color: const Color(0xFF101820),
-
                               border: Border.all(
                                 color: const Color(0xFF263441),
                                 width: 2,
                               ),
                             ),
-
                             child: ClipOval(
                               child: selectedImage != null
                                   ? Image.file(
@@ -223,25 +221,19 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             ),
                           ),
 
-                          // CAMERA BUTTON
                           Positioned(
                             right: 0,
                             bottom: 3,
-
                             child: Container(
                               height: 34,
                               width: 34,
-
                               decoration: const BoxDecoration(
                                 color: primaryColor,
                                 shape: BoxShape.circle,
                               ),
-
                               child: IconButton(
                                 padding: EdgeInsets.zero,
-
                                 onPressed: _pickProfileImage,
-
                                 icon: const Icon(
                                   Icons.camera_alt_rounded,
                                   color: Colors.white,
@@ -257,10 +249,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                       GestureDetector(
                         onTap: _pickProfileImage,
-
                         child: const Text(
                           'Add Profile Photo',
-
                           style: TextStyle(
                             color: primaryColor,
                             fontSize: 13,
@@ -283,18 +273,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                 TextFormField(
                   controller: nameController,
-
                   cursorColor: primaryColor,
-
                   style: const TextStyle(color: Colors.white),
-
                   textCapitalization: TextCapitalization.words,
-
                   decoration: _inputDecoration(
                     hintText: 'Enter your full name',
                     icon: Icons.person_outline_rounded,
                   ),
-
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your full name';
@@ -319,11 +304,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                 GestureDetector(
                   onTap: _selectDate,
-
                   child: AbsorbPointer(
                     child: TextFormField(
                       style: const TextStyle(color: Colors.white),
-
                       decoration: _inputDecoration(
                         hintText: selectedDate == null
                             ? 'Select your date of birth'
@@ -347,22 +330,16 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                 DropdownButtonFormField<String>(
                   value: selectedGender,
-
                   dropdownColor: const Color(0xFF151515),
-
                   iconEnabledColor: Colors.white54,
-
                   style: const TextStyle(color: Colors.white, fontSize: 14),
-
                   decoration: _inputDecoration(
                     hintText: 'Select your gender',
                     icon: Icons.wc_outlined,
                   ),
-
                   items: genders.map((gender) {
                     return DropdownMenuItem(value: gender, child: Text(gender));
                   }).toList(),
-
                   onChanged: (value) {
                     setState(() {
                       selectedGender = value;
@@ -380,7 +357,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-
                         children: [
                           _sectionLabel('Height'),
 
@@ -388,18 +364,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                           TextFormField(
                             controller: heightController,
-
                             cursorColor: primaryColor,
-
                             style: const TextStyle(color: Colors.white),
-
                             keyboardType: TextInputType.number,
-
                             decoration: _inputDecoration(
                               hintText: 'Height (cm)',
                               icon: Icons.height_rounded,
                             ),
-
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Required';
@@ -425,7 +396,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-
                         children: [
                           _sectionLabel('Weight'),
 
@@ -433,18 +403,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                           TextFormField(
                             controller: weightController,
-
                             cursorColor: primaryColor,
-
                             style: const TextStyle(color: Colors.white),
-
                             keyboardType: TextInputType.number,
-
                             decoration: _inputDecoration(
                               hintText: 'Weight (kg)',
                               icon: Icons.monitor_weight_outlined,
                             ),
-
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Required';
@@ -478,41 +443,30 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
                     Container(
                       height: 56,
-
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-
                       decoration: BoxDecoration(
                         color: const Color(0xFF151515),
-
                         borderRadius: BorderRadius.circular(14),
-
                         border: Border.all(color: const Color(0xFF303030)),
                       ),
-
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: selectedCountryCode,
-
                           dropdownColor: const Color(0xFF151515),
-
                           iconEnabledColor: Colors.white54,
-
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                           ),
-
                           items: countryCodes.map((code) {
                             return DropdownMenuItem(
                               value: code,
                               child: Text(code),
                             );
                           }).toList(),
-
                           onChanged: (value) {
                             if (value == null) return;
 
@@ -529,18 +483,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: phoneController,
-
                         cursorColor: primaryColor,
-
                         style: const TextStyle(color: Colors.white),
-
                         keyboardType: TextInputType.phone,
-
                         decoration: _inputDecoration(
                           hintText: 'Phone number',
                           icon: Icons.phone_outlined,
                         ),
-
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Please enter your phone number';
@@ -565,23 +514,18 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 52,
-
                   child: ElevatedButton(
                     onPressed: _continue,
-
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
-
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-
                     child: const Text(
                       'Continue',
-
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -606,7 +550,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   Widget _sectionLabel(String title) {
     return Text(
       title,
-
       style: const TextStyle(
         color: Colors.white,
         fontSize: 13,
@@ -625,37 +568,27 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   }) {
     return InputDecoration(
       hintText: hintText,
-
       hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-
       prefixIcon: Icon(icon, color: Colors.grey, size: 20),
-
       filled: true,
-
       fillColor: const Color(0xFF151515),
-
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Color(0xFF303030)),
       ),
-
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Color(0xFF303030)),
       ),
-
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: primaryColor),
       ),
-
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.red),
       ),
-
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.red),
