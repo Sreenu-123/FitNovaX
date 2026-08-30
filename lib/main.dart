@@ -3,8 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../Screens/splash_screen.dart';
 import '../Screens/reset_password_screen.dart';
+import '../Screens/login_callback_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+bool isWaitingForAccountConfirmation = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,16 +32,35 @@ class _FitNovaXAppState extends State<FitNovaXApp> {
   void initState() {
     super.initState();
 
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      debugPrint('AUTH EVENT: ${data.event}');
+    Supabase.instance.client.auth.onAuthStateChange.listen(
+      (data) {
+        debugPrint('AUTH EVENT: ${data.event}');
 
-      if (data.event == AuthChangeEvent.passwordRecovery) {
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
-          (route) => false,
-        );
-      }
-    });
+        // PASSWORD RECOVERY
+        if (data.event == AuthChangeEvent.passwordRecovery) {
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+            (route) => false,
+          );
+
+          return;
+        }
+
+        // ACCOUNT CONFIRMATION
+        if (data.event == AuthChangeEvent.signedIn &&
+            isWaitingForAccountConfirmation) {
+          isWaitingForAccountConfirmation = false;
+
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginCallbackScreen()),
+            (route) => false,
+          );
+        }
+      },
+      onError: (error, stackTrace) {
+        debugPrint('AUTH ERROR: $error');
+      },
+    );
   }
 
   @override
