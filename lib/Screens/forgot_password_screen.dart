@@ -40,7 +40,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       await supabase.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'fitnovax://reset-password/',
+        redirectTo: 'fitnovax://reset-password',
       );
 
       if (!mounted) return;
