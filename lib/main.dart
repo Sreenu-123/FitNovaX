@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../Screens/splash_screen.dart';
 import '../Screens/reset_password_screen.dart';
 import '../Screens/login_callback_screen.dart';
+import '../Screens/login_screen.dart';
 import 'MainScreens/main_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -13,7 +14,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 bool isWaitingForAccountConfirmation = false;
 bool isWaitingForGoogleLogin = false;
 
-// 🔥 Normal login click cheythu ennu track cheyyan oru global flag
+// Normal login button click track cheyyan
 bool isNormalLoginAttempting = false;
 
 Future<void> main() async {
@@ -45,12 +46,13 @@ class _FitNovaXAppState extends State<FitNovaXApp> {
 
   void _listenToAuthChanges() {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
-      (data) {
+      (data) async {
         debugPrint('AUTH EVENT: ${data.event}');
 
-        // --------------------------------------------------
-        // 1. PASSWORD RECOVERY FLOW
-        // --------------------------------------------------
+        // ==================================================
+        // 1. PASSWORD RECOVERY
+        // ==================================================
+
         if (data.event == AuthChangeEvent.passwordRecovery) {
           isWaitingForAccountConfirmation = false;
           isWaitingForGoogleLogin = false;
@@ -60,50 +62,154 @@ class _FitNovaXAppState extends State<FitNovaXApp> {
             MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
             (route) => false,
           );
+
           return;
         }
 
-        // --------------------------------------------------
-        // 2. SIGNED IN FLOW
-        // --------------------------------------------------
+        // ==================================================
+        // 2. SIGNED IN
+        // ==================================================
+
         if (data.event == AuthChangeEvent.signedIn) {
           final session = Supabase.instance.client.auth.currentSession;
+
           final user = session?.user;
 
-          // Check if Google Login
-          final identities = user?.identities;
-          bool isGoogleLogin = false;
-
-          if (identities != null && identities.isNotEmpty) {
-            isGoogleLogin = identities.any(
-              (identity) => identity.provider == 'google',
-            );
+          if (user == null) {
+            return;
           }
 
-          // Email already confirmed aano ennariyuka
-          final bool isEmailConfirmed = user?.emailConfirmedAt != null;
+          // ==================================================
+          // EMAIL CONFIRMATION
+          // ==================================================
 
-          // 🔥 Google Login, Normal Login Button click, allel Email already confirmed aanengil -> MainScreen
-          if (isGoogleLogin ||
-              user?.appMetadata['provider'] == 'google' ||
-              isNormalLoginAttempting ||
-              isEmailConfirmed) {
-            isWaitingForGoogleLogin = false;
+          if (isWaitingForAccountConfirmation) {
             isWaitingForAccountConfirmation = false;
-            isNormalLoginAttempting = false; // Reset flag
+            isWaitingForGoogleLogin = false;
+            isNormalLoginAttempting = false;
+
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginCallbackScreen()),
+              (route) => false,
+            );
+
+            return;
+          }
+
+          // ==================================================
+          // GOOGLE LOGIN CHECK
+          // ==================================================
+
+          final identities = user.identities;
+
+          final bool isGoogleLogin =
+              identities != null &&
+              identities.any((identity) => identity.provider == 'google');
+
+          final bool isGoogleProvider =
+              user.appMetadata['provider'] == 'google';
+
+          // ==================================================
+          // GOOGLE LOGIN
+          // ==================================================
+
+          if (isGoogleLogin || isGoogleProvider) {
+            debugPrint('GOOGLE LOGIN DETECTED');
+
+            try {
+              // ----------------------------------------------
+              // CHECK FITNOVAX PROFILE
+              // ----------------------------------------------
+
+              final profile = await Supabase.instance.client
+                  .from('profiles')
+                  .select('id')
+                  .eq('id', user.id)
+                  .maybeSingle();
+
+              // ----------------------------------------------
+              // PROFILE DOES NOT EXIST
+              // ----------------------------------------------
+
+              if (profile == null) {
+                debugPrint('GOOGLE USER NOT REGISTERED IN FITNOVAX');
+
+                isWaitingForGoogleLogin = false;
+                isWaitingForAccountConfirmation = false;
+                isNormalLoginAttempting = false;
+
+                await Supabase.instance.client.auth.signOut();
+
+                navigatorKey.currentState?.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+
+                ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'No FitNovaX account found. Please sign up first.',
+                    ),
+                  ),
+                );
+
+                return;
+              }
+
+              // ----------------------------------------------
+              // PROFILE EXISTS
+              // ----------------------------------------------
+
+              debugPrint('GOOGLE USER REGISTERED - CONTINUING');
+
+              isWaitingForGoogleLogin = false;
+              isWaitingForAccountConfirmation = false;
+              isNormalLoginAttempting = false;
+
+              navigatorKey.currentState?.pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const MainScreen()),
+                (route) => false,
+              );
+            } on PostgrestException catch (error) {
+              debugPrint('GOOGLE PROFILE CHECK ERROR: ${error.message}');
+
+              isWaitingForGoogleLogin = false;
+
+              await Supabase.instance.client.auth.signOut();
+
+              navigatorKey.currentState?.pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+
+              ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Could not verify your FitNovaX account: ${error.message}',
+                  ),
+                ),
+              );
+            }
+
+            return;
+          }
+
+          // ==================================================
+          // NORMAL EMAIL / PASSWORD LOGIN
+          // ==================================================
+
+          if (isNormalLoginAttempting) {
+            isNormalLoginAttempting = false;
+            isWaitingForAccountConfirmation = false;
+            isWaitingForGoogleLogin = false;
 
             navigatorKey.currentState?.pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const MainScreen()),
               (route) => false,
             );
-          } else {
-            // Puthiya user sign-up cheythu, email innum confirm cheyyathavar aanengil mathram LoginCallbackScreen
-            navigatorKey.currentState?.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginCallbackScreen()),
-              (route) => false,
-            );
+
+            return;
           }
-          return;
         }
       },
       onError: (error, stackTrace) {

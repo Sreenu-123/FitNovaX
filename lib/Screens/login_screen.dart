@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
-
 import 'package:fit_nova_x/Screens/personal_details_screen.dart';
+import 'package:fit_nova_x/MainScreens/main_screen.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../main.dart';
@@ -45,21 +46,37 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildLogo(),
+
               const SizedBox(height: 20),
+
               _buildHeader(),
+
               const SizedBox(height: 40),
+
               _buildEmailField(),
+
               const SizedBox(height: 20),
+
               _buildPasswordField(),
+
               const SizedBox(height: 12),
+
               _buildForgotPassword(),
+
               const SizedBox(height: 8),
+
               _buildSignInButton(),
+
               const SizedBox(height: 28),
+
               _buildDivider(),
+
               const SizedBox(height: 22),
+
               _buildSocialButtons(),
+
               const SizedBox(height: 25),
+
               _buildSignUp(),
             ],
           ),
@@ -68,17 +85,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // LOGO
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildLogo() {
     return Image.asset('assets/Images/logoNoBack.png', height: 100, width: 100);
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // HEADER
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildHeader() {
     return const Column(
@@ -91,7 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
+
         SizedBox(height: 5),
+
         Text(
           'Continue Your Fitness Journey',
           style: TextStyle(color: subtitleColor, fontSize: 13),
@@ -100,9 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // EMAIL FIELD
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildEmailField() {
     return TextField(
@@ -124,9 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // PASSWORD FIELD
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildPasswordField() {
     return TextField(
@@ -160,9 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // FORGOT PASSWORD
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildForgotPassword() {
     return Align(
@@ -185,9 +204,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // SIGN IN BUTTON
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildSignInButton() {
     return SizedBox(
@@ -221,13 +240,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // EMAIL / PASSWORD SIGN IN
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<void> _signIn() async {
     final email = emailController.text.trim();
     final password = passwordController.text;
+
+    // ----------------------------------------------------------
+    // BASIC VALIDATION
+    // ----------------------------------------------------------
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,6 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
     if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid email address')),
@@ -249,13 +273,56 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await supabase.auth.signInWithPassword(email: email, password: password);
+      // --------------------------------------------------------
+      // SIGN IN WITH SUPABASE
+      // --------------------------------------------------------
+
+      final AuthResponse response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      final User? user = response.user;
+
+      if (user == null) {
+        throw const AuthException('Login failed. Please try again.');
+      }
+
+      // --------------------------------------------------------
+      // CHECK WHETHER PROFILE EXISTS
+      // --------------------------------------------------------
+
+      final Map<String, dynamic>? profile = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle();
 
       if (!mounted) return;
 
-      // 🔥 Sign-in successful aayaal Personal Details Screen-ilekku pokan
+      // --------------------------------------------------------
+      // NO PROFILE
+      // → PERSONAL DETAILS
+      // --------------------------------------------------------
+
+      if (profile == null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const PersonalDetailsScreen(),
+          ),
+          (route) => false,
+        );
+
+        return;
+      }
+
+      // --------------------------------------------------------
+      // PROFILE EXISTS
+      // → HOME
+      // --------------------------------------------------------
+
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const PersonalDetailsScreen()),
+        MaterialPageRoute(builder: (context) => MainScreen()),
         (route) => false,
       );
     } on AuthException catch (error) {
@@ -264,6 +331,14 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.message)));
+    } on PostgrestException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not check your profile: ${error.message}'),
+        ),
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -281,9 +356,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // GOOGLE SIGN IN
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<void> _signInWithGoogle() async {
     if (isSigningIn || isGoogleSigningIn) {
@@ -330,26 +405,28 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // OR DIVIDER
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildDivider() {
     return Row(
       children: [
         Expanded(child: Divider(color: Colors.grey.shade700)),
+
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12)),
         ),
+
         Expanded(child: Divider(color: Colors.grey.shade700)),
       ],
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // SOCIAL BUTTONS
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildSocialButtons() {
     return Row(
@@ -363,7 +440,9 @@ class _LoginScreenState extends State<LoginScreen> {
             isLoading: isGoogleSigningIn,
           ),
         ),
+
         const SizedBox(width: 12),
+
         Expanded(
           child: _socialButton(
             imagePath: 'assets/Images/facebook.png',
@@ -382,9 +461,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
-  // REUSABLE SOCIAL BUTTON
-  // ------------------------------------------------------------
+  // ============================================================
+  // SOCIAL BUTTON
+  // ============================================================
 
   Widget _socialButton({
     required String imagePath,
@@ -413,7 +492,9 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(imagePath, height: imageSize, width: imageSize),
+
                 const SizedBox(width: 8),
+
                 Text(
                   label,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -423,9 +504,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // SIGN UP
-  // ------------------------------------------------------------
+  // ============================================================
 
   Widget _buildSignUp() {
     return Row(
@@ -435,6 +516,7 @@ class _LoginScreenState extends State<LoginScreen> {
           "Don't have an account?",
           style: TextStyle(color: Colors.grey, fontSize: 13),
         ),
+
         TextButton(
           onPressed: isSigningIn || isGoogleSigningIn
               ? null
