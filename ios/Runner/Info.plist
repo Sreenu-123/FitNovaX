@@ -38,9 +38,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
-	<!-- Flutter Deep Linking -->
+	<!-- Disable Flutter automatic deep-link routing -->
 	<key>FlutterDeepLinkingEnabled</key>
-	<true/>
+	<false/>
 
 	<!-- FitNovaX Deep Link -->
 	<key>CFBundleURLTypes</key>

@@ -1,13 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../Screens/splash_screen.dart';
 import '../Screens/reset_password_screen.dart';
 import '../Screens/login_callback_screen.dart';
+import 'MainScreens/main_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 bool isWaitingForAccountConfirmation = false;
+bool isWaitingForGoogleLogin = false;
+
+// 🔥 Normal login click cheythu ennu track cheyyan oru global flag
+bool isNormalLoginAttempting = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,39 +35,87 @@ class FitNovaXApp extends StatefulWidget {
 }
 
 class _FitNovaXAppState extends State<FitNovaXApp> {
+  StreamSubscription<AuthState>? _authSubscription;
+
   @override
   void initState() {
     super.initState();
+    _listenToAuthChanges();
+  }
 
-    Supabase.instance.client.auth.onAuthStateChange.listen(
+  void _listenToAuthChanges() {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
       (data) {
         debugPrint('AUTH EVENT: ${data.event}');
 
-        // PASSWORD RECOVERY
+        // --------------------------------------------------
+        // 1. PASSWORD RECOVERY FLOW
+        // --------------------------------------------------
         if (data.event == AuthChangeEvent.passwordRecovery) {
+          isWaitingForAccountConfirmation = false;
+          isWaitingForGoogleLogin = false;
+          isNormalLoginAttempting = false;
+
           navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
             (route) => false,
           );
-
           return;
         }
 
-        // ACCOUNT CONFIRMATION
-        if (data.event == AuthChangeEvent.signedIn &&
-            isWaitingForAccountConfirmation) {
-          isWaitingForAccountConfirmation = false;
+        // --------------------------------------------------
+        // 2. SIGNED IN FLOW
+        // --------------------------------------------------
+        if (data.event == AuthChangeEvent.signedIn) {
+          final session = Supabase.instance.client.auth.currentSession;
+          final user = session?.user;
 
-          navigatorKey.currentState?.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const LoginCallbackScreen()),
-            (route) => false,
-          );
+          // Check if Google Login
+          final identities = user?.identities;
+          bool isGoogleLogin = false;
+
+          if (identities != null && identities.isNotEmpty) {
+            isGoogleLogin = identities.any(
+              (identity) => identity.provider == 'google',
+            );
+          }
+
+          // Email already confirmed aano ennariyuka
+          final bool isEmailConfirmed = user?.emailConfirmedAt != null;
+
+          // 🔥 Google Login, Normal Login Button click, allel Email already confirmed aanengil -> MainScreen
+          if (isGoogleLogin ||
+              user?.appMetadata['provider'] == 'google' ||
+              isNormalLoginAttempting ||
+              isEmailConfirmed) {
+            isWaitingForGoogleLogin = false;
+            isWaitingForAccountConfirmation = false;
+            isNormalLoginAttempting = false; // Reset flag
+
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const MainScreen()),
+              (route) => false,
+            );
+          } else {
+            // Puthiya user sign-up cheythu, email innum confirm cheyyathavar aanengil mathram LoginCallbackScreen
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginCallbackScreen()),
+              (route) => false,
+            );
+          }
+          return;
         }
       },
       onError: (error, stackTrace) {
         debugPrint('AUTH ERROR: $error');
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   @override

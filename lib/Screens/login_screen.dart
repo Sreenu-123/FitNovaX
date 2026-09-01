@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
+
 import 'package:fit_nova_x/Screens/personal_details_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,12 +17,15 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool isSigningIn = false;
+  bool isGoogleSigningIn = false;
 
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  final SupabaseClient supabase = Supabase.instance.client;
 
   @override
   void dispose() {
@@ -39,37 +45,21 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildLogo(),
-
               const SizedBox(height: 20),
-
               _buildHeader(),
-
               const SizedBox(height: 40),
-
               _buildEmailField(),
-
               const SizedBox(height: 20),
-
               _buildPasswordField(),
-
               const SizedBox(height: 12),
-
               _buildForgotPassword(),
-
               const SizedBox(height: 8),
-
               _buildSignInButton(),
-
               const SizedBox(height: 28),
-
               _buildDivider(),
-
               const SizedBox(height: 22),
-
               _buildSocialButtons(),
-
               const SizedBox(height: 25),
-
               _buildSignUp(),
             ],
           ),
@@ -101,9 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-
         SizedBox(height: 5),
-
         Text(
           'Continue Your Fitness Journey',
           style: TextStyle(color: subtitleColor, fontSize: 13),
@@ -121,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: emailController,
       cursorColor: primaryColor,
       keyboardType: TextInputType.emailAddress,
+      enabled: !isSigningIn && !isGoogleSigningIn,
       decoration: InputDecoration(
         hintText: 'Email',
         hintStyle: TextStyle(color: Colors.grey.shade500),
@@ -144,16 +133,19 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: passwordController,
       cursorColor: primaryColor,
       obscureText: isPasswordHidden,
+      enabled: !isSigningIn && !isGoogleSigningIn,
       decoration: InputDecoration(
         hintText: 'Password',
         hintStyle: TextStyle(color: Colors.grey.shade500),
         prefixIcon: const Icon(Icons.lock_outline),
         suffixIcon: IconButton(
-          onPressed: () {
-            setState(() {
-              isPasswordHidden = !isPasswordHidden;
-            });
-          },
+          onPressed: isSigningIn || isGoogleSigningIn
+              ? null
+              : () {
+                  setState(() {
+                    isPasswordHidden = !isPasswordHidden;
+                  });
+                },
           icon: Icon(
             isPasswordHidden ? Icons.visibility : Icons.visibility_off,
           ),
@@ -176,13 +168,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const ForgotPasswordScreen(),
-            ),
-          );
-        },
+        onPressed: isSigningIn || isGoogleSigningIn
+            ? null
+            : () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ForgotPasswordScreen(),
+                  ),
+                );
+              },
         child: const Text(
           'Forgot Password?',
           style: TextStyle(color: primaryColor, fontSize: 14),
@@ -200,10 +194,11 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: isSigningIn ? null : _signIn,
+        onPressed: isSigningIn || isGoogleSigningIn ? null : _signIn,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: primaryColor.withValues(alpha: 0.5),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -227,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ------------------------------------------------------------
-  // SIGN IN
+  // EMAIL / PASSWORD SIGN IN
   // ------------------------------------------------------------
 
   Future<void> _signIn() async {
@@ -241,7 +236,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!email.contains('@gmail.com')) {
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid email address')),
       );
@@ -253,24 +249,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      await supabase.auth.signInWithPassword(email: email, password: password);
 
       if (!mounted) return;
 
-      if (response.session != null && response.user != null) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const PersonalDetailsScreen(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed. Please try again.')),
-        );
-      }
+      // 🔥 Sign-in successful aayaal Personal Details Screen-ilekku pokan
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const PersonalDetailsScreen()),
+        (route) => false,
+      );
     } on AuthException catch (error) {
       if (!mounted) return;
 
@@ -295,6 +282,55 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ------------------------------------------------------------
+  // GOOGLE SIGN IN
+  // ------------------------------------------------------------
+
+  Future<void> _signInWithGoogle() async {
+    if (isSigningIn || isGoogleSigningIn) {
+      return;
+    }
+
+    setState(() {
+      isGoogleSigningIn = true;
+    });
+
+    isWaitingForGoogleLogin = true;
+
+    try {
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'fitnovax://login-callback',
+      );
+    } on AuthException catch (error) {
+      isWaitingForGoogleLogin = false;
+
+      if (!mounted) return;
+
+      setState(() {
+        isGoogleSigningIn = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      isWaitingForGoogleLogin = false;
+
+      if (!mounted) return;
+
+      setState(() {
+        isGoogleSigningIn = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google sign-in failed. Please try again.'),
+        ),
+      );
+    }
+  }
+
+  // ------------------------------------------------------------
   // OR DIVIDER
   // ------------------------------------------------------------
 
@@ -302,12 +338,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Row(
       children: [
         Expanded(child: Divider(color: Colors.grey.shade700)),
-
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12)),
         ),
-
         Expanded(child: Divider(color: Colors.grey.shade700)),
       ],
     );
@@ -325,21 +359,22 @@ class _LoginScreenState extends State<LoginScreen> {
             imagePath: 'assets/Images/google.png',
             label: 'Google',
             imageSize: 20,
-            onPressed: () {
-              // Google sign-in will be added later
-            },
+            onPressed: _signInWithGoogle,
+            isLoading: isGoogleSigningIn,
           ),
         ),
-
         const SizedBox(width: 12),
-
         Expanded(
           child: _socialButton(
             imagePath: 'assets/Images/facebook.png',
             label: 'Facebook',
             imageSize: 35,
             onPressed: () {
-              // Facebook sign-in will be added later
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Facebook login will be added next.'),
+                ),
+              );
             },
           ),
         ),
@@ -356,27 +391,35 @@ class _LoginScreenState extends State<LoginScreen> {
     required String label,
     required double imageSize,
     required VoidCallback onPressed,
+    bool isLoading = false,
   }) {
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, 50),
         side: const BorderSide(color: Colors.grey),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(imagePath, height: imageSize, width: imageSize),
-
-          const SizedBox(width: 8),
-
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-          ),
-        ],
-      ),
+      child: isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: primaryColor,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(imagePath, height: imageSize, width: imageSize),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            ),
     );
   }
 
@@ -392,13 +435,16 @@ class _LoginScreenState extends State<LoginScreen> {
           "Don't have an account?",
           style: TextStyle(color: Colors.grey, fontSize: 13),
         ),
-
         TextButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const SignUpScreen()),
-            );
-          },
+          onPressed: isSigningIn || isGoogleSigningIn
+              ? null
+              : () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SignUpScreen(),
+                    ),
+                  );
+                },
           child: const Text(
             'Sign Up',
             style: TextStyle(color: primaryColor, fontSize: 13),
