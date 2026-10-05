@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:fit_nova_x/Screens/founder_note_screen.dart';
+import 'package:fit_nova_x/services/api_service.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({super.key});
@@ -21,13 +21,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
+
   final TextEditingController heightController = TextEditingController();
+
   final TextEditingController weightController = TextEditingController();
+
   final TextEditingController phoneController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-
-  final SupabaseClient _supabase = Supabase.instance.client;
 
   DateTime? selectedDate;
 
@@ -113,33 +114,20 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   }
 
   // ===============================================================
-  // UPLOAD PROFILE IMAGE
+  // CALCULATE AGE
   // ===============================================================
 
-  Future<String?> _uploadProfileImage(String userId) async {
-    if (selectedImage == null) {
-      return null;
+  int _calculateAge(DateTime birthDate) {
+    final DateTime today = DateTime.now();
+
+    int age = today.year - birthDate.year;
+
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
     }
 
-    final String filePath =
-        '$userId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-    await _supabase.storage
-        .from('profile-images')
-        .upload(
-          filePath,
-          selectedImage!,
-          fileOptions: const FileOptions(
-            upsert: true,
-            contentType: 'image/jpeg',
-          ),
-        );
-
-    final String imageUrl = _supabase.storage
-        .from('profile-images')
-        .getPublicUrl(filePath);
-
-    return imageUrl;
+    return age;
   }
 
   // ===============================================================
@@ -167,73 +155,52 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       return;
     }
 
-    final User? user = _supabase.auth.currentUser;
+    final double? height = double.tryParse(heightController.text.trim());
 
-    if (user == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please login again')));
+    final double? weight = double.tryParse(weightController.text.trim());
 
+    if (height == null || weight == null) {
       return;
     }
+
+    final int age = _calculateAge(selectedDate!);
 
     setState(() {
       isSaving = true;
     });
 
     try {
-      // -----------------------------------------------------------
-      // Upload profile image if selected
-      // -----------------------------------------------------------
+      // Temporary user ID.
+      //
+      // Later this will come from our real
+      // authentication system.
+      final String userId = DateTime.now().millisecondsSinceEpoch.toString();
 
-      String? profileImageUrl;
+      final bool success = await ApiService.createUserProfile(
+        userId: userId,
+        name: nameController.text.trim(),
+        age: age,
+        gender: selectedGender!,
+        height: height,
+        weight: weight,
+      );
 
-      if (selectedImage != null) {
-        profileImageUrl = await _uploadProfileImage(user.id);
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile saved successfully')),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const FounderNoteScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Profile save failed')));
       }
-
-      // -----------------------------------------------------------
-      // Save profile data
-      // -----------------------------------------------------------
-
-      await _supabase.from('profiles').upsert({
-        'id': user.id,
-        'name': nameController.text.trim(),
-        'date_of_birth': _formatDateForDatabase(selectedDate!),
-        'gender': selectedGender,
-        'height': double.parse(heightController.text.trim()),
-        'weight': double.parse(weightController.text.trim()),
-        'phone': phoneController.text.trim(),
-        'country_code': selectedCountryCode,
-        'profile_image_url': profileImageUrl,
-      });
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved successfully')),
-      );
-
-      // -----------------------------------------------------------
-      // Move to Founder Note
-      // -----------------------------------------------------------
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const FounderNoteScreen()),
-      );
-    } on StorageException catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image upload failed: ${error.message}')),
-      );
-    } on PostgrestException catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile save failed: ${error.message}')),
-      );
     } catch (error) {
       if (!mounted) return;
 
@@ -247,17 +214,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         });
       }
     }
-  }
-
-  // ===============================================================
-  // FORMAT DATE FOR SUPABASE
-  // ===============================================================
-
-  String _formatDateForDatabase(DateTime date) {
-    final String month = date.month.toString().padLeft(2, '0');
-    final String day = date.day.toString().padLeft(2, '0');
-
-    return '${date.year}-$month-$day';
   }
 
   // ===============================================================
@@ -620,7 +576,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           onChanged: isSaving
                               ? null
                               : (value) {
-                                  if (value == null) return;
+                                  if (value == null) {
+                                    return;
+                                  }
 
                                   setState(() {
                                     selectedCountryCode = value;

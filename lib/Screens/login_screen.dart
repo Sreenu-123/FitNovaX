@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
-import 'package:fit_nova_x/Screens/personal_details_screen.dart';
-import 'package:fit_nova_x/MainScreens/main_screen.dart';
-
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,12 +16,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isGoogleSigningIn = false;
 
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
+
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
 
-  final SupabaseClient supabase = Supabase.instance.client;
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -272,88 +267,20 @@ class _LoginScreenState extends State<LoginScreen> {
       isSigningIn = true;
     });
 
-    try {
-      // --------------------------------------------------------
-      // SIGN IN WITH SUPABASE
-      // --------------------------------------------------------
+    // Authentication will be connected to FastAPI later.
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      final AuthResponse response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+    if (!mounted) return;
 
-      final User? user = response.user;
+    setState(() {
+      isSigningIn = false;
+    });
 
-      if (user == null) {
-        throw const AuthException('Login failed. Please try again.');
-      }
-
-      // --------------------------------------------------------
-      // CHECK WHETHER PROFILE EXISTS
-      // --------------------------------------------------------
-
-      final Map<String, dynamic>? profile = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id)
-          .maybeSingle();
-
-      if (!mounted) return;
-
-      // --------------------------------------------------------
-      // NO PROFILE
-      // → PERSONAL DETAILS
-      // --------------------------------------------------------
-
-      if (profile == null) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const PersonalDetailsScreen(),
-          ),
-          (route) => false,
-        );
-
-        return;
-      }
-
-      // --------------------------------------------------------
-      // PROFILE EXISTS
-      // → HOME
-      // --------------------------------------------------------
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MainScreen()),
-        (route) => false,
-      );
-    } on AuthException catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } on PostgrestException catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not check your profile: ${error.message}'),
-        ),
-      );
-    } catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
-      );
-    } finally {
-      if (!mounted) return;
-
-      setState(() {
-        isSigningIn = false;
-      });
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Login authentication will be connected next.'),
+      ),
+    );
   }
 
   // ============================================================
@@ -369,40 +296,17 @@ class _LoginScreenState extends State<LoginScreen> {
       isGoogleSigningIn = true;
     });
 
-    isWaitingForGoogleLogin = true;
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    try {
-      await supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'fitnovax://login-callback',
-      );
-    } on AuthException catch (error) {
-      isWaitingForGoogleLogin = false;
+    if (!mounted) return;
 
-      if (!mounted) return;
+    setState(() {
+      isGoogleSigningIn = false;
+    });
 
-      setState(() {
-        isGoogleSigningIn = false;
-      });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } catch (error) {
-      isWaitingForGoogleLogin = false;
-
-      if (!mounted) return;
-
-      setState(() {
-        isGoogleSigningIn = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google sign-in failed. Please try again.'),
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Google login will be added later.')),
+    );
   }
 
   // ============================================================

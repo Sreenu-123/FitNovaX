@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fit_nova_x/Screens/login_screen.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../main.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -13,14 +10,19 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
+
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
+
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController phoneController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
@@ -51,6 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     phoneController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+
     super.dispose();
   }
 
@@ -69,6 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           content: Text('Please agree to the Terms & Conditions.'),
         ),
       );
+
       return;
     }
 
@@ -76,79 +80,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
       isCreatingAccount = true;
     });
 
-    try {
-      final supabase = Supabase.instance.client;
+    // ===========================================================
+    // AUTHENTICATION WILL BE CONNECTED HERE LATER
+    // ===========================================================
 
-      final response = await supabase.auth.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-        emailRedirectTo: 'fitnovax://login-callback',
-        data: {
-          'full_name': nameController.text.trim(),
-          'country_code': selectedCountryCode,
-          'phone_number': phoneController.text.trim(),
-        },
-      );
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        isCreatingAccount = false;
-      });
+    setState(() {
+      isCreatingAccount = false;
+    });
 
-      if (response.user != null) {
-        // Wait for the email confirmation callback.
-        isWaitingForAccountConfirmation = true;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Account created! Please check your email and verify your account.',
-            ),
-          ),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      }
-    } on AuthException catch (error) {
-      if (!mounted) return;
-
-      setState(() {
-        isCreatingAccount = false;
-      });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } catch (error) {
-      if (!mounted) return;
-
-      setState(() {
-        isCreatingAccount = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account registration will be connected soon.'),
+      ),
+    );
   }
+
+  // ===============================================================
+  // BUILD
+  // ===============================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+
           child: Form(
             key: _formKey,
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+
               children: [
                 // =====================================================
                 // LOGO
@@ -191,24 +160,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   cursorColor: primaryColor,
                   style: const TextStyle(color: Colors.white),
                   textInputAction: TextInputAction.next,
+
                   decoration: InputDecoration(
                     hintText: 'Full Name',
                     hintStyle: TextStyle(color: Colors.grey.shade500),
+
                     prefixIcon: const Icon(
                       Icons.person_outline,
                       color: Colors.grey,
                     ),
+
                     filled: true,
                     fillColor: const Color(0xFF151515),
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
+
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(color: primaryColor),
                     ),
                   ),
+
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your name';
@@ -229,24 +204,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
+
                   decoration: InputDecoration(
                     hintText: 'Email',
                     hintStyle: TextStyle(color: Colors.grey.shade500),
+
                     prefixIcon: const Icon(
                       Icons.email_outlined,
                       color: Colors.grey,
                     ),
+
                     filled: true,
                     fillColor: const Color(0xFF151515),
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
+
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(color: primaryColor),
                     ),
                   ),
+
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your email';
@@ -269,38 +250,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // =====================================================
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
                     Container(
                       height: 56,
+
                       padding: const EdgeInsets.symmetric(horizontal: 10),
+
                       decoration: BoxDecoration(
                         color: const Color(0xFF151515),
                         borderRadius: BorderRadius.circular(30),
                       ),
+
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: selectedCountryCode,
+
                           dropdownColor: const Color(0xFF151515),
+
                           icon: const Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.grey,
                           ),
+
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                           ),
+
                           borderRadius: BorderRadius.circular(15),
+
                           items: countryCodes.map((code) {
                             return DropdownMenuItem<String>(
                               value: code,
+
                               child: Text(
                                 code,
                                 style: const TextStyle(color: Colors.white),
                               ),
                             );
                           }).toList(),
+
                           onChanged: (value) {
-                            if (value == null) return;
+                            if (value == null) {
+                              return;
+                            }
 
                             setState(() {
                               selectedCountryCode = value;
@@ -316,27 +310,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: TextFormField(
                         controller: phoneController,
                         cursorColor: primaryColor,
+
                         style: const TextStyle(color: Colors.white),
+
                         keyboardType: TextInputType.phone,
+
                         textInputAction: TextInputAction.next,
+
                         decoration: InputDecoration(
                           hintText: 'Phone Number',
+
                           hintStyle: TextStyle(color: Colors.grey.shade500),
+
                           prefixIcon: const Icon(
                             Icons.phone_outlined,
                             color: Colors.grey,
                           ),
+
                           filled: true,
                           fillColor: const Color(0xFF151515),
+
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide.none,
                           ),
+
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(color: primaryColor),
                           ),
                         ),
+
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Enter phone number';
@@ -361,22 +365,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: passwordController,
                   cursorColor: primaryColor,
+
                   style: const TextStyle(color: Colors.white),
+
                   obscureText: isPasswordHidden,
+
                   textInputAction: TextInputAction.next,
+
                   decoration: InputDecoration(
                     hintText: 'Password',
+
                     hintStyle: TextStyle(color: Colors.grey.shade500),
+
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: Colors.grey,
                     ),
+
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
                           isPasswordHidden = !isPasswordHidden;
                         });
                       },
+
                       icon: Icon(
                         isPasswordHidden
                             ? Icons.visibility
@@ -384,17 +396,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         color: Colors.grey,
                       ),
                     ),
+
                     filled: true,
                     fillColor: const Color(0xFF151515),
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
+
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(color: primaryColor),
                     ),
                   ),
+
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a password';
@@ -415,22 +431,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // =====================================================
                 TextFormField(
                   controller: confirmPasswordController,
+
                   cursorColor: primaryColor,
+
                   style: const TextStyle(color: Colors.white),
+
                   obscureText: isConfirmPasswordHidden,
+
                   decoration: InputDecoration(
                     hintText: 'Confirm Password',
+
                     hintStyle: TextStyle(color: Colors.grey.shade500),
+
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: Colors.grey,
                     ),
+
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
                           isConfirmPasswordHidden = !isConfirmPasswordHidden;
                         });
                       },
+
                       icon: Icon(
                         isConfirmPasswordHidden
                             ? Icons.visibility
@@ -438,17 +462,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         color: Colors.grey,
                       ),
                     ),
+
                     filled: true,
                     fillColor: const Color(0xFF151515),
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
+
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(color: primaryColor),
                     ),
                   ),
+
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please confirm your password';
@@ -469,12 +497,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // =====================================================
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
+
                   children: [
                     Checkbox(
                       value: termsAccepted,
+
                       activeColor: primaryColor,
                       checkColor: Colors.white,
+
                       side: const BorderSide(color: Colors.grey),
+
                       onChanged: (value) {
                         setState(() {
                           termsAccepted = value ?? false;
@@ -489,13 +521,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             termsAccepted = !termsAccepted;
                           });
                         },
+
                         child: const Text.rich(
                           TextSpan(
                             text: 'I agree to the ',
+
                             style: TextStyle(color: Colors.grey, fontSize: 12),
+
                             children: [
                               TextSpan(
                                 text: 'Terms & Conditions',
+
                                 style: TextStyle(
                                   color: primaryColor,
                                   fontWeight: FontWeight.w500,
@@ -517,23 +553,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
+
                   child: ElevatedButton(
                     onPressed: isCreatingAccount ? null : _createAccount,
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
+
                       disabledBackgroundColor: primaryColor.withValues(
                         alpha: 0.5,
                       ),
+
                       foregroundColor: Colors.white,
+
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
+
                       elevation: 0,
                     ),
+
                     child: isCreatingAccount
                         ? const SizedBox(
                             height: 22,
                             width: 22,
+
                             child: CircularProgressIndicator(
                               color: Colors.white,
                               strokeWidth: 2.5,
@@ -541,6 +585,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           )
                         : const Text(
                             'Create Account',
+
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w500,
@@ -556,17 +601,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // =====================================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+
                   children: [
                     const Text(
                       'Already have an account?',
+
                       style: TextStyle(color: Colors.grey, fontSize: 13),
                     ),
+
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
+
                       child: const Text(
                         'Sign In',
+
                         style: TextStyle(color: primaryColor, fontSize: 13),
                       ),
                     ),

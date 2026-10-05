@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -10,12 +9,12 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
+
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
 
-  final SupabaseClient supabase = Supabase.instance.client;
+  final TextEditingController emailController = TextEditingController();
 
   bool isLoading = false;
   bool emailSent = false;
@@ -26,6 +25,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  // ============================================================
+  // SEND RESET LINK
+  // ============================================================
+
   Future<void> _sendResetLink() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -35,44 +38,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       isLoading = true;
     });
 
-    try {
-      final email = emailController.text.trim();
+    // ==========================================================
+    // FASTAPI PASSWORD RESET WILL BE CONNECTED HERE LATER
+    // ==========================================================
 
-      await supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'fitnovax://reset-password',
-      );
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        isLoading = false;
-        emailSent = true;
-      });
-    } on AuthException catch (error) {
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } catch (error) {
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
-      );
-    }
+    setState(() {
+      isLoading = false;
+      emailSent = true;
+    });
   }
+
+  // ============================================================
+  // BACK TO SIGN IN
+  // ============================================================
 
   void _goBackToSignIn() {
     Navigator.pop(context);
@@ -88,7 +70,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // ==================================================
               // BACK BUTTON
+              // ==================================================
+
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
@@ -103,7 +88,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               const SizedBox(height: 25),
 
+              // ==================================================
               // LOGO
+              // ==================================================
               Image.asset(
                 'assets/Images/logoNoBack.png',
                 height: 90,
@@ -123,13 +110,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
+  // ============================================================
+  // FORGOT PASSWORD FORM
+  // ============================================================
+
   Widget _buildForgotPasswordForm() {
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // ======================================================
           // TITLE
+          // ======================================================
+
           const Text(
             'Forgot Password?',
             style: TextStyle(
@@ -141,7 +135,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           const SizedBox(height: 8),
 
+          // ======================================================
           // SUBTITLE
+          // ======================================================
           const Text(
             'Enter your email and we’ll send you a link\n'
             'to reset your password.',
@@ -151,7 +147,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           const SizedBox(height: 40),
 
+          // ======================================================
           // EMAIL
+          // ======================================================
           TextFormField(
             controller: emailController,
             cursorColor: primaryColor,
@@ -199,7 +197,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           const SizedBox(height: 25),
 
+          // ======================================================
           // SEND RESET LINK
+          // ======================================================
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -235,7 +235,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           const SizedBox(height: 25),
 
+          // ======================================================
           // BACK TO LOGIN
+          // ======================================================
           TextButton(
             onPressed: isLoading ? null : _goBackToSignIn,
             child: const Text(
@@ -248,13 +250,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
+  // ============================================================
+  // SUCCESS MESSAGE
+  // ============================================================
+
   Widget _buildSuccessMessage() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 5),
 
+        // ========================================================
         // SUCCESS ICON
+        // ========================================================
         Container(
           height: 70,
           width: 70,
@@ -271,7 +279,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         const SizedBox(height: 25),
 
+        // ========================================================
         // SUCCESS TITLE
+        // ========================================================
         const Text(
           'Check Your Email',
           textAlign: TextAlign.center,
@@ -284,7 +294,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         const SizedBox(height: 12),
 
+        // ========================================================
         // SUCCESS MESSAGE
+        // ========================================================
         Text(
           'We’ve sent a password reset link to\n'
           '${emailController.text.trim()}',
@@ -298,7 +310,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         const SizedBox(height: 35),
 
+        // ========================================================
         // GO BACK TO SIGN IN
+        // ========================================================
         SizedBox(
           width: double.infinity,
           height: 50,
