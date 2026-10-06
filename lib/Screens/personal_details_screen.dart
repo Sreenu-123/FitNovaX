@@ -7,7 +7,10 @@ import 'package:fit_nova_x/Screens/founder_note_screen.dart';
 import 'package:fit_nova_x/services/api_service.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
-  const PersonalDetailsScreen({super.key});
+  final String? userId;
+  final String? name;
+
+  const PersonalDetailsScreen({super.key, this.userId, this.name});
 
   @override
   State<PersonalDetailsScreen> createState() => _PersonalDetailsScreenState();
@@ -43,6 +46,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   final List<String> countryCodes = ['+91', '+1', '+44', '+61', '+971', '+65'];
 
   final List<String> genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.name != null && widget.name!.trim().isNotEmpty) {
+      nameController.text = widget.name!.trim();
+    }
+  }
 
   @override
   void dispose() {
@@ -160,6 +172,28 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     final double? weight = double.tryParse(weightController.text.trim());
 
     if (height == null || weight == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter valid height and weight')),
+      );
+
+      return;
+    }
+
+    // -------------------------------------------------------------
+    // IMPORTANT:
+    // Use the actual authenticated user's ID.
+    // Do NOT create a temporary ID here.
+    // -------------------------------------------------------------
+
+    final String? userId = widget.userId;
+
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User account not found. Please login again.'),
+        ),
+      );
+
       return;
     }
 
@@ -170,19 +204,23 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     });
 
     try {
-      // Temporary user ID.
-      //
-      // Later this will come from our real
-      // authentication system.
-      final String userId = DateTime.now().millisecondsSinceEpoch.toString();
-
       final bool success = await ApiService.createUserProfile(
         userId: userId,
         name: nameController.text.trim(),
         age: age,
+        dateOfBirth: selectedDate,
         gender: selectedGender!,
+        phone: phoneController.text.trim(),
+        countryCode: selectedCountryCode,
         height: height,
         weight: weight,
+
+        // ---------------------------------------------------------
+        // Temporary:
+        // This is only the local device path.
+        // Actual image upload/storage will be added later.
+        // ---------------------------------------------------------
+        profileImage: selectedImage?.path,
       );
 
       if (!mounted) return;
@@ -418,7 +456,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 const SizedBox(height: 8),
 
                 DropdownButtonFormField<String>(
-                  value: selectedGender,
+                  initialValue: selectedGender,
                   dropdownColor: const Color(0xFF151515),
                   iconEnabledColor: Colors.white54,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -434,7 +472,10 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     return null;
                   },
                   items: genders.map((gender) {
-                    return DropdownMenuItem(value: gender, child: Text(gender));
+                    return DropdownMenuItem<String>(
+                      value: gender,
+                      child: Text(gender),
+                    );
                   }).toList(),
                   onChanged: isSaving
                       ? null
@@ -568,7 +609,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             fontSize: 13,
                           ),
                           items: countryCodes.map((code) {
-                            return DropdownMenuItem(
+                            return DropdownMenuItem<String>(
                               value: code,
                               child: Text(code),
                             );

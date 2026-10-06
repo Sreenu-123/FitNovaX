@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:fit_nova_x/Screens/sign_up_screen.dart';
 import 'package:fit_nova_x/Screens/forgot_password_screen.dart';
+import 'package:fit_nova_x/Screens/personal_details_screen.dart';
+import 'package:fit_nova_x/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,13 +13,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isPasswordHidden = true;
-  bool isSigningIn = false;
-  bool isGoogleSigningIn = false;
-
   static const Color primaryColor = Color.fromARGB(255, 34, 174, 239);
 
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
+
+  bool isPasswordHidden = true;
+  bool isSigningIn = false;
+  bool isGoogleSigningIn = false;
 
   final TextEditingController emailController = TextEditingController();
 
@@ -27,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+
     super.dispose();
   }
 
@@ -34,11 +37,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+
             children: [
               _buildLogo(),
 
@@ -121,17 +127,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildEmailField() {
     return TextField(
       controller: emailController,
+
       cursorColor: primaryColor,
+
       keyboardType: TextInputType.emailAddress,
+
       enabled: !isSigningIn && !isGoogleSigningIn,
+
       decoration: InputDecoration(
         hintText: 'Email',
+
         hintStyle: TextStyle(color: Colors.grey.shade500),
+
         prefixIcon: const Icon(Icons.email_outlined),
+
         filled: true,
+
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
+
           borderSide: const BorderSide(color: primaryColor),
         ),
       ),
@@ -145,13 +161,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildPasswordField() {
     return TextField(
       controller: passwordController,
+
       cursorColor: primaryColor,
+
       obscureText: isPasswordHidden,
+
       enabled: !isSigningIn && !isGoogleSigningIn,
+
       decoration: InputDecoration(
         hintText: 'Password',
+
         hintStyle: TextStyle(color: Colors.grey.shade500),
+
         prefixIcon: const Icon(Icons.lock_outline),
+
         suffixIcon: IconButton(
           onPressed: isSigningIn || isGoogleSigningIn
               ? null
@@ -160,14 +183,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     isPasswordHidden = !isPasswordHidden;
                   });
                 },
+
           icon: Icon(
             isPasswordHidden ? Icons.visibility : Icons.visibility_off,
           ),
         ),
+
         filled: true,
+
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
+
           borderSide: const BorderSide(color: primaryColor),
         ),
       ),
@@ -181,6 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildForgotPassword() {
     return Align(
       alignment: Alignment.centerRight,
+
       child: TextButton(
         onPressed: isSigningIn || isGoogleSigningIn
             ? null
@@ -191,8 +220,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
+
         child: const Text(
           'Forgot Password?',
+
           style: TextStyle(color: primaryColor, fontSize: 14),
         ),
       ),
@@ -206,29 +237,41 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSignInButton() {
     return SizedBox(
       width: double.infinity,
+
       height: 50,
+
       child: ElevatedButton(
         onPressed: isSigningIn || isGoogleSigningIn ? null : _signIn,
+
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
+
           foregroundColor: Colors.white,
+
           disabledBackgroundColor: primaryColor.withValues(alpha: 0.5),
+
           elevation: 0,
+
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
+
         child: isSigningIn
             ? const SizedBox(
                 height: 22,
+
                 width: 22,
+
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
+
                   color: Colors.white,
                 ),
               )
             : const Text(
                 'Sign In',
+
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
               ),
       ),
@@ -236,21 +279,23 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ============================================================
-  // EMAIL / PASSWORD SIGN IN
+  // EMAIL / PASSWORD LOGIN
   // ============================================================
 
   Future<void> _signIn() async {
     final email = emailController.text.trim();
+
     final password = passwordController.text;
 
     // ----------------------------------------------------------
-    // BASIC VALIDATION
+    // VALIDATION
     // ----------------------------------------------------------
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your email and password')),
       );
+
       return;
     }
 
@@ -260,6 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid email address')),
       );
+
       return;
     }
 
@@ -267,24 +313,87 @@ class _LoginScreenState extends State<LoginScreen> {
       isSigningIn = true;
     });
 
-    // Authentication will be connected to FastAPI later.
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // --------------------------------------------------------
+      // FASTAPI LOGIN
+      // --------------------------------------------------------
 
-    if (!mounted) return;
+      final result = await ApiService.login(email: email, password: password);
 
-    setState(() {
-      isSigningIn = false;
-    });
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login authentication will be connected next.'),
-      ),
-    );
+      // --------------------------------------------------------
+      // LOGIN SUCCESS
+      // --------------------------------------------------------
+
+      if (result['success'] == true) {
+        final String? userId = result['user_id'] as String?;
+
+        final String? name = result['name'] as String?;
+
+        if (userId == null || userId.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login failed. User ID not found.')),
+          );
+
+          return;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Login successful.')),
+        );
+
+        // ------------------------------------------------------
+        // TEMPORARY FLOW
+        //
+        // Every successful login currently goes to
+        // Personal Details.
+        //
+        // Later:
+        // Check whether UserProfile exists.
+        // If profile exists -> MainScreen
+        // If profile doesn't exist -> PersonalDetailsScreen
+        // ------------------------------------------------------
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) =>
+                PersonalDetailsScreen(userId: userId, name: name),
+          ),
+          (route) => false,
+        );
+
+        return;
+      }
+
+      // --------------------------------------------------------
+      // LOGIN FAILED
+      // --------------------------------------------------------
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Invalid email or password.'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not connect to server. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSigningIn = false;
+        });
+      }
+    }
   }
 
   // ============================================================
-  // GOOGLE SIGN IN
+  // GOOGLE LOGIN
   // ============================================================
 
   Future<void> _signInWithGoogle() async {
@@ -310,7 +419,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ============================================================
-  // OR DIVIDER
+  // DIVIDER
   // ============================================================
 
   Widget _buildDivider() {
@@ -320,6 +429,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
+
           child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12)),
         ),
 
@@ -338,9 +448,13 @@ class _LoginScreenState extends State<LoginScreen> {
         Expanded(
           child: _socialButton(
             imagePath: 'assets/Images/google.png',
+
             label: 'Google',
+
             imageSize: 20,
+
             onPressed: _signInWithGoogle,
+
             isLoading: isGoogleSigningIn,
           ),
         ),
@@ -350,8 +464,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Expanded(
           child: _socialButton(
             imagePath: 'assets/Images/facebook.png',
+
             label: 'Facebook',
+
             imageSize: 35,
+
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -378,22 +495,30 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return OutlinedButton(
       onPressed: isLoading ? null : onPressed,
+
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, 50),
+
         side: const BorderSide(color: Colors.grey),
+
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
+
       child: isLoading
           ? const SizedBox(
               height: 20,
+
               width: 20,
+
               child: CircularProgressIndicator(
                 strokeWidth: 2,
+
                 color: primaryColor,
               ),
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
+
               children: [
                 Image.asset(imagePath, height: imageSize, width: imageSize),
 
@@ -401,6 +526,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Text(
                   label,
+
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ],
@@ -415,9 +541,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSignUp() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+
       children: [
         const Text(
           "Don't have an account?",
+
           style: TextStyle(color: Colors.grey, fontSize: 13),
         ),
 
@@ -431,8 +559,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   );
                 },
+
           child: const Text(
             'Sign Up',
+
             style: TextStyle(color: primaryColor, fontSize: 13),
           ),
         ),

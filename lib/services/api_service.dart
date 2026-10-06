@@ -17,6 +17,69 @@ class ApiService {
   }
 
   // ============================================
+  // SIGN UP
+  // ============================================
+
+  static Future<Map<String, dynamic>> signUp({
+    required String name,
+    required String email,
+    required String phone,
+    required String countryCode,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/signup'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'country_code': countryCode,
+        'password': password,
+      }),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return {
+      'success': response.statusCode == 201,
+      'message': data['message'] ?? 'Something went wrong',
+      'user_id': data['user_id'],
+    };
+  }
+
+  // ============================================
+  // LOGIN
+  // ============================================
+
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return {
+      'success': data['success'] ?? false,
+      'message': data['message'] ?? 'Something went wrong',
+      'user_id': data['user_id'],
+      'name': data['name'],
+      'email': data['email'],
+    };
+  }
+
+  // ============================================
   // CREATE USER PROFILE
   // ============================================
 
@@ -27,6 +90,10 @@ class ApiService {
     required String gender,
     required double height,
     required double weight,
+    DateTime? dateOfBirth,
+    String? phone,
+    String? countryCode,
+    String? profileImage,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/users'),
@@ -35,9 +102,13 @@ class ApiService {
         'user_id': userId,
         'name': name,
         'age': age,
+        'date_of_birth': dateOfBirth?.toIso8601String().split('T').first,
         'gender': gender,
+        'phone': phone,
+        'country_code': countryCode,
         'height': height,
         'weight': weight,
+        'profile_image': profileImage,
       }),
     );
 
