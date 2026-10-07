@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:fit_nova_x/services/api_service.dart';
+
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -38,18 +40,58 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       isLoading = true;
     });
 
-    // ==========================================================
-    // FASTAPI PASSWORD RESET WILL BE CONNECTED HERE LATER
-    // ==========================================================
+    try {
+      final email = emailController.text.trim();
 
-    await Future.delayed(const Duration(milliseconds: 500));
+      // ========================================================
+      // CALL FASTAPI
+      // ========================================================
 
-    if (!mounted) return;
+      final result = await ApiService.forgotPassword(email: email);
 
-    setState(() {
-      isLoading = false;
-      emailSent = true;
-    });
+      if (!mounted) return;
+
+      // ========================================================
+      // SUCCESS
+      // ========================================================
+
+      if (result['success'] == true) {
+        setState(() {
+          isLoading = false;
+          emailSent = true;
+        });
+
+        return;
+      }
+
+      // ========================================================
+      // FAILED
+      // ========================================================
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Unable to send reset link.'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+        ),
+      );
+
+      print('Forgot password error: $error');
+    }
   }
 
   // ============================================================

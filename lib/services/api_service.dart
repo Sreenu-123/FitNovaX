@@ -80,6 +80,55 @@ class ApiService {
   }
 
   // ============================================
+  // FORGOT PASSWORD
+  // ============================================
+
+  static Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/forgot-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return {
+      'success': data['success'] ?? false,
+      'message': data['message'] ?? 'Something went wrong',
+    };
+  }
+
+  // ============================================
+  // RESET PASSWORD
+  // ============================================
+
+  static Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'token': token, 'new_password': newPassword}),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return {
+      'success': data['success'] ?? false,
+      'message': data['message'] ?? 'Something went wrong',
+    };
+  }
+
+  // ============================================
   // GET USER PROFILE
   // ============================================
 

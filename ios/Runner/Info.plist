@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
 <plist version="1.0">
 <dict>
+
+	<!-- ========================================================= -->
+	<!-- BASIC APP CONFIGURATION                                   -->
+	<!-- ========================================================= -->
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 
@@ -38,34 +44,56 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
-	<!-- Disable Flutter automatic deep-link routing -->
+
+	<!-- ========================================================= -->
+	<!-- FLUTTER DEEP LINKING                                      -->
+	<!-- ========================================================= -->
+
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
 
-	<!-- FitNovaX Deep Link -->
+
+	<!-- ========================================================= -->
+	<!-- FITNOVAX CUSTOM URL SCHEME                                -->
+	<!-- ========================================================= -->
+
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+
+			<key>CFBundleURLName</key>
+			<string>com.fitnovax.app</string>
 
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fitnovax</string>
 			</array>
+
 		</dict>
 	</array>
 
+
+	<!-- ========================================================= -->
+	<!-- IOS SCENE CONFIGURATION                                   -->
+	<!-- ========================================================= -->
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
+
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 
 		<key>UISceneConfigurations</key>
 		<dict>
+
 			<key>UIWindowSceneSessionRoleApplication</key>
 			<array>
+
 				<dict>
+
 					<key>UISceneClassName</key>
 					<string>UIWindowScene</string>
 
@@ -77,10 +105,19 @@
 
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
+
 				</dict>
+
 			</array>
+
 		</dict>
+
 	</dict>
+
+
+	<!-- ========================================================= -->
+	<!-- GENERAL IOS SETTINGS                                      -->
+	<!-- ========================================================= -->
 
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
@@ -91,12 +128,22 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 
+
+	<!-- ========================================================= -->
+	<!-- IPHONE ORIENTATION                                        -->
+	<!-- ========================================================= -->
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+
+	<!-- ========================================================= -->
+	<!-- IPAD ORIENTATION                                          -->
+	<!-- ========================================================= -->
 
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
