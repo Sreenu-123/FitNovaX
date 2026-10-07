@@ -6,6 +6,7 @@ import 'package:fit_nova_x/Screens/personal_details_screen.dart';
 import 'package:fit_nova_x/MainScreens/main_screen.dart';
 
 import 'package:fit_nova_x/services/api_service.dart';
+import 'package:fit_nova_x/services/session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,37 +47,21 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildLogo(),
-
               const SizedBox(height: 20),
-
               _buildHeader(),
-
               const SizedBox(height: 40),
-
               _buildEmailField(),
-
               const SizedBox(height: 20),
-
               _buildPasswordField(),
-
               const SizedBox(height: 12),
-
               _buildForgotPassword(),
-
               const SizedBox(height: 8),
-
               _buildSignInButton(),
-
               const SizedBox(height: 28),
-
               _buildDivider(),
-
               const SizedBox(height: 22),
-
               _buildSocialButtons(),
-
               const SizedBox(height: 25),
-
               _buildSignUp(),
             ],
           ),
@@ -108,9 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-
         SizedBox(height: 5),
-
         Text(
           'Continue Your Fitness Journey',
           style: TextStyle(color: subtitleColor, fontSize: 13),
@@ -301,6 +284,14 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         // ------------------------------------------------------
+        // SAVE LOGIN SESSION
+        // ------------------------------------------------------
+
+        await SessionService.saveLogin(userId: userId);
+
+        if (!mounted) return;
+
+        // ------------------------------------------------------
         // CHECK WHETHER USER PROFILE EXISTS
         // ------------------------------------------------------
 
@@ -402,12 +393,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Row(
       children: [
         Expanded(child: Divider(color: Colors.grey.shade700)),
-
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12)),
         ),
-
         Expanded(child: Divider(color: Colors.grey.shade700)),
       ],
     );
@@ -429,9 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
             isLoading: isGoogleSigningIn,
           ),
         ),
-
         const SizedBox(width: 12),
-
         Expanded(
           child: _socialButton(
             imagePath: 'assets/Images/facebook.png',
@@ -481,9 +468,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(imagePath, height: imageSize, width: imageSize),
-
                 const SizedBox(width: 8),
-
                 Text(
                   label,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -505,7 +490,6 @@ class _LoginScreenState extends State<LoginScreen> {
           "Don't have an account?",
           style: TextStyle(color: Colors.grey, fontSize: 13),
         ),
-
         TextButton(
           onPressed: isSigningIn || isGoogleSigningIn
               ? null

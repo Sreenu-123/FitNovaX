@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:fit_nova_x/Screens/login_screen.dart';
+import 'package:fit_nova_x/services/session_service.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -18,11 +21,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -33,7 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             size: 20,
           ),
         ),
-
         title: const Text(
           'Settings',
           style: TextStyle(
@@ -42,16 +42,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         centerTitle: true,
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -240,27 +236,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return Container(
       width: double.infinity,
-
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-
       decoration: BoxDecoration(
         color: const Color(0xFF08131F),
         borderRadius: BorderRadius.circular(17),
-
         border: Border.all(color: const Color(0xFF142333)),
       ),
-
       child: Row(
         children: [
           Container(
             height: 45,
             width: 45,
-
             decoration: BoxDecoration(
               color: blue.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(13),
             ),
-
             child: Icon(icon, color: blue, size: 23),
           ),
 
@@ -308,30 +298,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return GestureDetector(
       onTap: onTap,
-
       child: Container(
         width: double.infinity,
-
         padding: const EdgeInsets.all(15),
-
         decoration: BoxDecoration(
           color: const Color(0xFF08131F),
           borderRadius: BorderRadius.circular(17),
-
           border: Border.all(color: const Color(0xFF142333)),
         ),
-
         child: Row(
           children: [
             Container(
               height: 45,
               width: 45,
-
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(13),
               ),
-
               child: Icon(icon, color: iconColor, size: 23),
             ),
 
@@ -382,26 +365,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showLanguageSheet() {
     showModalBottomSheet(
       context: context,
-
       backgroundColor: const Color(0xFF08131F),
-
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-
       builder: (context) {
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
-
             child: Column(
               mainAxisSize: MainAxisSize.min,
-
               children: [
                 Container(
                   height: 4,
                   width: 40,
-
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(10),
@@ -422,9 +399,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 20),
 
                 _languageOption('English', true),
+
                 const SizedBox(height: 10),
+
                 _languageOption('Malayalam', false),
+
                 const SizedBox(height: 10),
+
                 _languageOption('Hindi', false),
               ],
             ),
@@ -439,26 +420,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         Navigator.pop(context);
       },
-
       child: Container(
         width: double.infinity,
-
         padding: const EdgeInsets.all(15),
-
         decoration: BoxDecoration(
           color: selected
               ? blue.withValues(alpha: 0.10)
               : const Color(0xFF101C29),
-
           borderRadius: BorderRadius.circular(14),
-
           border: Border.all(
             color: selected
                 ? blue.withValues(alpha: 0.4)
                 : const Color(0xFF172A3A),
           ),
         ),
-
         child: Row(
           children: [
             Text(
@@ -487,27 +462,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showAboutDialog() {
     showDialog(
       context: context,
-
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF101C29),
-
           title: const Text(
             'FitNovaX',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-
           content: const Text(
-            'Your personal fitness companion.\n\nVersion 1.0.0',
+            'Your personal fitness companion.\n\n'
+            'Version 1.0.0',
             style: TextStyle(color: Colors.white60, height: 1.5),
           ),
-
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-
               child: const Text('Close', style: TextStyle(color: blue)),
             ),
           ],
@@ -523,27 +494,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: const Color(0xFF101C29),
-
           title: const Text(
             'Log Out?',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-
           content: const Text(
             'Are you sure you want to log out?',
             style: TextStyle(color: Colors.white60),
           ),
-
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
-
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white54),
@@ -551,10 +517,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () async {
+                // Close confirmation dialog first.
+                Navigator.pop(dialogContext);
 
+                // Clear saved login session.
+                await SessionService.clearSession();
+
+                if (!mounted) return;
+
+                // Go to LoginScreen and remove
+                // all previous screens from navigation stack.
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
               child: const Text(
                 'Log Out',
                 style: TextStyle(color: Colors.redAccent),
@@ -573,28 +551,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
-
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF101C29),
-
           title: const Text(
             'Delete Account?',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-
           content: const Text(
             'This action cannot be undone. Your account and '
             'associated data may be permanently removed.',
             style: TextStyle(color: Colors.white60, height: 1.4),
           ),
-
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white54),
@@ -605,7 +578,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-
               child: const Text(
                 'Delete',
                 style: TextStyle(color: Colors.redAccent),
