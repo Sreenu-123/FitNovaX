@@ -80,6 +80,36 @@ class ApiService {
   }
 
   // ============================================
+  // GET USER PROFILE
+  // ============================================
+
+  static Future<Map<String, dynamic>> getUserProfile({
+    required String userId,
+  }) async {
+    final response = await http.get(Uri.parse('$baseUrl/users/$userId'));
+
+    print(response.statusCode);
+    print(response.body);
+
+    final data = jsonDecode(response.body);
+
+    return {
+      'exists': data['exists'] ?? false,
+      'user_id': data['user_id'],
+      'name': data['name'],
+      'age': data['age'],
+      'date_of_birth': data['date_of_birth'],
+      'gender': data['gender'],
+      'phone': data['phone'],
+      'country_code': data['country_code'],
+      'height': data['height'],
+      'weight': data['weight'],
+      'profile_image': data['profile_image'],
+      'message': data['message'],
+    };
+  }
+
+  // ============================================
   // CREATE USER PROFILE
   // ============================================
 
