@@ -16,7 +16,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 bool isWaitingForAccountConfirmation = false;
 bool isWaitingForGoogleLogin = false;
 
-// Normal login button click track cheyyan
 bool isNormalLoginAttempting = false;
 
 // ============================================
@@ -29,21 +28,28 @@ StreamSubscription<Uri>? _deepLinkSubscription;
 
 bool isPasswordResetFlow = false;
 
+String? _pendingResetToken;
+String? _lastHandledUri;
+
 // ============================================
-// HANDLE PASSWORD RESET LINK
+// HANDLE DEEP LINK
 // ============================================
 
 void _handleDeepLink(Uri uri) {
   debugPrint('DEEP LINK RECEIVED: $uri');
 
-  // Example:
-  // fitnovax://reset-password?token=ABC123
-
   if (uri.scheme != 'fitnovax') {
     return;
   }
 
+  // Avoid processing the same URI twice.
+  if (_lastHandledUri == uri.toString()) {
+    return;
+  }
+
   if (uri.host != 'reset-password') {
+    // Other deep links, such as login-callback,
+    // are not handled by this password-reset handler.
     return;
   }
 
@@ -54,25 +60,44 @@ void _handleDeepLink(Uri uri) {
     return;
   }
 
-  debugPrint('PASSWORD RESET TOKEN RECEIVED');
-
+  _lastHandledUri = uri.toString();
+  _pendingResetToken = token;
   isPasswordResetFlow = true;
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    final navigator = navigatorKey.currentState;
+  _openResetScreenWhenReady();
+}
 
-    if (navigator == null) {
-      debugPrint('Navigator is not ready yet.');
-      return;
-    }
+// ============================================
+// OPEN RESET SCREEN
+// ============================================
 
-    navigator.pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => ResetPasswordScreen(token: token),
-      ),
-      (route) => false,
-    );
-  });
+void _openResetScreenWhenReady() {
+  final String? token = _pendingResetToken;
+
+  if (token == null || token.isEmpty) {
+    return;
+  }
+
+  final navigator = navigatorKey.currentState;
+
+  if (navigator == null) {
+    // Keep the token pending until MaterialApp is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openResetScreenWhenReady();
+    });
+    return;
+  }
+
+  // Consume the pending token before navigation to avoid
+  // opening the same reset screen more than once.
+  _pendingResetToken = null;
+
+  navigator.pushAndRemoveUntil(
+    MaterialPageRoute<void>(
+      builder: (context) => ResetPasswordScreen(token: token),
+    ),
+    (route) => false,
+  );
 }
 
 // ============================================
@@ -85,7 +110,6 @@ Future<void> _handleInitialDeepLink() async {
 
     if (initialUri != null) {
       debugPrint('INITIAL DEEP LINK: $initialUri');
-
       _handleDeepLink(initialUri);
     }
   } catch (error) {
@@ -102,7 +126,7 @@ void _listenForDeepLinks() {
     (Uri uri) {
       _handleDeepLink(uri);
     },
-    onError: (error) {
+    onError: (Object error) {
       debugPrint('DEEP LINK STREAM ERROR: $error');
     },
   );
@@ -115,45 +139,60 @@ void _listenForDeepLinks() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ============================================
-  // FITNOVAX FASTAPI BACKEND CONNECTION TEST
-  // ============================================
-
-  ApiService.testConnection();
-
-  // ============================================
-  // DEEP LINK LISTENER
-  // ============================================
-
+  // Start listening for incoming links.
   _listenForDeepLinks();
 
-  // Check if app was opened directly
-  // through a deep link.
+  // Check whether the app was launched through a link.
   await _handleInitialDeepLink();
 
-  // ============================================
-  // RUN APP
-  // ============================================
+  // Test backend connectivity.
+  // Do not block app startup if this request fails.
+  unawaited(_testBackendConnection());
 
   runApp(const FitNovaXApp());
+}
+
+Future<void> _testBackendConnection() async {
+  try {
+    await ApiService.testConnection();
+  } catch (error) {
+    debugPrint('BACKEND CONNECTION ERROR: $error');
+  }
 }
 
 // ============================================
 // FITNOVAX APP
 // ============================================
 
-class FitNovaXApp extends StatelessWidget {
+class FitNovaXApp extends StatefulWidget {
   const FitNovaXApp({super.key});
+
+  @override
+  State<FitNovaXApp> createState() => _FitNovaXAppState();
+}
+
+class _FitNovaXAppState extends State<FitNovaXApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    // The first frame ensures MaterialApp's Navigator exists.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openResetScreenWhenReady();
+    });
+  }
+
+  @override
+  void dispose() {
+    _deepLinkSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-
-      // ==========================================
-      // DEFAULT APP SCREEN
-      // ==========================================
       home: const SplashScreen(),
     );
   }

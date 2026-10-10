@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -12,8 +13,7 @@ class ApiService {
   static Future<void> testConnection() async {
     final response = await http.get(Uri.parse('$baseUrl/health'));
 
-    print(response.statusCode);
-    print(response.body);
+    debugPrint('Backend status: ${response.statusCode}');
   }
 
   // ============================================
@@ -39,10 +39,7 @@ class ApiService {
       }),
     );
 
-    print(response.statusCode);
-    print(response.body);
-
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return {
       'success': response.statusCode == 201,
@@ -65,10 +62,7 @@ class ApiService {
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    print(response.statusCode);
-    print(response.body);
-
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return {
       'success': data['success'] ?? false,
@@ -92,10 +86,7 @@ class ApiService {
       body: jsonEncode({'email': email}),
     );
 
-    print(response.statusCode);
-    print(response.body);
-
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return {
       'success': data['success'] ?? false,
@@ -117,10 +108,7 @@ class ApiService {
       body: jsonEncode({'token': token, 'new_password': newPassword}),
     );
 
-    print(response.statusCode);
-    print(response.body);
-
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return {
       'success': data['success'] ?? false,
@@ -137,10 +125,7 @@ class ApiService {
   }) async {
     final response = await http.get(Uri.parse('$baseUrl/users/$userId'));
 
-    print(response.statusCode);
-    print(response.body);
-
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return {
       'exists': data['exists'] ?? false,
@@ -190,9 +175,6 @@ class ApiService {
         'profile_image': profileImage,
       }),
     );
-
-    print(response.statusCode);
-    print(response.body);
 
     return response.statusCode == 200;
   }

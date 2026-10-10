@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (!mounted) return;
 
-      print('Session check error: $error');
+      debugPrint('Session check error: $error');
 
       // If backend cannot be reached,
       // don't blindly open MainScreen.

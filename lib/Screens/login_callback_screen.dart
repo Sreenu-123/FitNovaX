@@ -9,9 +9,8 @@ class LoginCallbackScreen extends StatelessWidget {
   static const Color subtitleColor = Color.fromARGB(255, 198, 197, 197);
 
   void _goToSignIn(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
       (route) => false,
     );
   }
@@ -20,15 +19,12 @@ class LoginCallbackScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
-
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-
             children: [
               // LOGO
               Image.asset(
@@ -43,12 +39,10 @@ class LoginCallbackScreen extends StatelessWidget {
               Container(
                 height: 90,
                 width: 90,
-
                 decoration: BoxDecoration(
                   color: primaryColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-
                 child: const Icon(
                   Icons.check_rounded,
                   color: primaryColor,
@@ -62,7 +56,6 @@ class LoginCallbackScreen extends StatelessWidget {
               const Text(
                 'Account Confirmed',
                 textAlign: TextAlign.center,
-
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -77,7 +70,6 @@ class LoginCallbackScreen extends StatelessWidget {
                 'Your email has been verified successfully.\n'
                 'You can now sign in to your FitNovaX account.',
                 textAlign: TextAlign.center,
-
                 style: TextStyle(
                   color: subtitleColor,
                   fontSize: 14,
@@ -91,23 +83,18 @@ class LoginCallbackScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 52,
-
                 child: ElevatedButton(
                   onPressed: () => _goToSignIn(context),
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
                     elevation: 0,
-
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-
                   child: const Text(
                     'Go to Sign In',
-
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                 ),

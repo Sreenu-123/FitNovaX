@@ -90,7 +90,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       );
 
-      print('Forgot password error: $error');
+      debugPrint('Forgot password error: $error');
     }
   }
 
