@@ -4,11 +4,36 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  // iOS Simulator / Desktop
+  // Android Emulator: use http://10.0.2.2:8000
   static const String baseUrl = 'http://127.0.0.1:8000';
 
-  // ============================================
+  // ============================================================
+  // DECODE RESPONSE
+  // ============================================================
+
+  static Map<String, dynamic> _decodeResponse(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      return {'success': false, 'message': 'Unexpected server response.'};
+    } on FormatException {
+      return {'success': false, 'message': 'Invalid server response.'};
+    }
+  }
+
+  static String _message(Map<String, dynamic> data) {
+    return (data['message'] ?? data['detail'] ?? 'Something went wrong.')
+        .toString();
+  }
+
+  // ============================================================
   // TEST BACKEND CONNECTION
-  // ============================================
+  // ============================================================
 
   static Future<void> testConnection() async {
     final response = await http.get(Uri.parse('$baseUrl/health'));
@@ -16,9 +41,9 @@ class ApiService {
     debugPrint('Backend status: ${response.statusCode}');
   }
 
-  // ============================================
+  // ============================================================
   // SIGN UP
-  // ============================================
+  // ============================================================
 
   static Future<Map<String, dynamic>> signUp({
     required String name,
@@ -39,18 +64,20 @@ class ApiService {
       }),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = _decodeResponse(response);
 
     return {
-      'success': response.statusCode == 201,
-      'message': data['message'] ?? 'Something went wrong',
+      'success': response.statusCode == 201 && data['success'] == true,
+      'message': _message(data),
       'user_id': data['user_id'],
+      'name': data['name'],
+      'email': data['email'],
     };
   }
 
-  // ============================================
+  // ============================================================
   // LOGIN
-  // ============================================
+  // ============================================================
 
   static Future<Map<String, dynamic>> login({
     required String email,
@@ -62,20 +89,20 @@ class ApiService {
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = _decodeResponse(response);
 
     return {
-      'success': data['success'] ?? false,
-      'message': data['message'] ?? 'Something went wrong',
+      'success': response.statusCode == 200 && data['success'] == true,
+      'message': _message(data),
       'user_id': data['user_id'],
       'name': data['name'],
       'email': data['email'],
     };
   }
 
-  // ============================================
+  // ============================================================
   // FORGOT PASSWORD
-  // ============================================
+  // ============================================================
 
   static Future<Map<String, dynamic>> forgotPassword({
     required String email,
@@ -86,17 +113,17 @@ class ApiService {
       body: jsonEncode({'email': email}),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = _decodeResponse(response);
 
     return {
-      'success': data['success'] ?? false,
-      'message': data['message'] ?? 'Something went wrong',
+      'success': response.statusCode == 200 && data['success'] == true,
+      'message': _message(data),
     };
   }
 
-  // ============================================
+  // ============================================================
   // RESET PASSWORD
-  // ============================================
+  // ============================================================
 
   static Future<Map<String, dynamic>> resetPassword({
     required String token,
@@ -108,29 +135,35 @@ class ApiService {
       body: jsonEncode({'token': token, 'new_password': newPassword}),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = _decodeResponse(response);
 
     return {
-      'success': data['success'] ?? false,
-      'message': data['message'] ?? 'Something went wrong',
+      'success': response.statusCode == 200 && data['success'] == true,
+      'message': _message(data),
     };
   }
 
-  // ============================================
+  // ============================================================
   // GET USER PROFILE
-  // ============================================
+  // ============================================================
 
   static Future<Map<String, dynamic>> getUserProfile({
     required String userId,
   }) async {
     final response = await http.get(Uri.parse('$baseUrl/users/$userId'));
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = _decodeResponse(response);
+
+    if (response.statusCode != 200) {
+      return {'success': false, 'exists': false, 'message': _message(data)};
+    }
 
     return {
+      'success': true,
       'exists': data['exists'] ?? false,
       'user_id': data['user_id'],
       'name': data['name'],
+      'email': data['email'],
       'age': data['age'],
       'date_of_birth': data['date_of_birth'],
       'gender': data['gender'],
@@ -139,13 +172,14 @@ class ApiService {
       'height': data['height'],
       'weight': data['weight'],
       'profile_image': data['profile_image'],
-      'message': data['message'],
+      'message': _message(data),
     };
   }
 
-  // ============================================
-  // CREATE USER PROFILE
-  // ============================================
+  // ============================================================
+  // CREATE OR SAVE USER PROFILE
+  // Returns bool to remain compatible with existing callers.
+  // ============================================================
 
   static Future<bool> createUserProfile({
     required String userId,
@@ -176,6 +210,80 @@ class ApiService {
       }),
     );
 
-    return response.statusCode == 200;
+    final data = _decodeResponse(response);
+
+    debugPrint('Save profile: ${_message(data)}');
+
+    return response.statusCode == 200 && data['success'] == true;
+  }
+
+  // ============================================================
+  // UPDATE EXISTING USER PROFILE
+  // ============================================================
+
+  static Future<Map<String, dynamic>> updateUserProfile({
+    required String userId,
+    String? name,
+    int? age,
+    DateTime? dateOfBirth,
+    String? gender,
+    String? phone,
+    String? countryCode,
+    double? height,
+    double? weight,
+    String? profileImage,
+  }) async {
+    final Map<String, dynamic> body = {};
+
+    if (name != null) {
+      body['name'] = name;
+    }
+
+    if (age != null) {
+      body['age'] = age;
+    }
+
+    if (dateOfBirth != null) {
+      body['date_of_birth'] = dateOfBirth.toIso8601String().split('T').first;
+    }
+
+    if (gender != null) {
+      body['gender'] = gender;
+    }
+
+    if (phone != null) {
+      body['phone'] = phone;
+    }
+
+    if (countryCode != null) {
+      body['country_code'] = countryCode;
+    }
+
+    if (height != null) {
+      body['height'] = height;
+    }
+
+    if (weight != null) {
+      body['weight'] = weight;
+    }
+
+    if (profileImage != null) {
+      body['profile_image'] = profileImage;
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/users/$userId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    final data = _decodeResponse(response);
+
+    debugPrint('Update profile: ${_message(data)}');
+
+    return {
+      'success': response.statusCode == 200 && data['success'] == true,
+      'message': _message(data),
+    };
   }
 }
